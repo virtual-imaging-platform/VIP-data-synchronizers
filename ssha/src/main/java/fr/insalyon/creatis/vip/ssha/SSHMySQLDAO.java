@@ -15,7 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * DAO for SSH synchronizations.
@@ -26,7 +26,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
     private static SSHMySQLDAO instance = null;
     private Connection connection;
 
-    private final Logger logger = Logger.getLogger("SSHMySQLDAO");
+    private final static Logger logger = Logger.getLogger(SSHMySQLDAO.class);
     
     private SSHMySQLDAO(String jdbcUrl, String userName, String password) throws SyncException {      
             connect(jdbcUrl, userName, password);

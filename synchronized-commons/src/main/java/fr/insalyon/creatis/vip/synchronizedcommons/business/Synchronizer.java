@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -28,7 +28,7 @@ public class Synchronizer extends Thread {
     private final long sleepTimeMillis; 
     private final LFCUtils lfcu;        // an object containing methods to transfer files to the synchronized LFC. 
     
-    private static final Logger logger = Logger.getLogger("Sync");
+    private static final Logger logger = Logger.getLogger(Synchronizer.class);
 
     /**
      * A constructor.
@@ -73,7 +73,8 @@ public class Synchronizer extends Thread {
             try {
                 synchronizations = sd.getSynchronization();
             } catch (SyncException ex) {
-                logger.log(Level.SEVERE, "Cannot get user accounts: {0}", ex.getMessage());
+                    logger.error("Cannot get user accounts: {0}"+ex.getMessage());
+                   
                 ex.printStackTrace();
             }
             for (Synchronization s : synchronizations) {
@@ -82,14 +83,14 @@ public class Synchronizer extends Thread {
                         doSync(s);
                     }
                 } catch (SyncException ex) {
-                    logger.log(Level.SEVERE, "Problem synchronizing user account {0}: {1}", new Object[]{s.toString(), ex.getMessage()});
+                    logger.error("Problem synchronizing user account {0}: {1} "+ex.getMessage());
                     ex.printStackTrace();
                     if (ex.getMessage().contains(sd.getAuthFailedString())) {
-                        logger.log(Level.INFO, "Marking failed authentication for user {0}", s.toString());
+                        logger.info("Marking failed authentication for user {0}"+ s.toString());
                         try {
                             sd.setAuthFailed(s);
                         } catch (SyncException ex1) {
-                            logger.log(Level.SEVERE, "Cannot mark failed authentication for user {0}", s.toString());
+                            logger.error("Cannot mark failed authentication for user {0}"+ s.toString());
                             ex.printStackTrace();
                         }
                     } 
@@ -100,7 +101,7 @@ public class Synchronizer extends Thread {
             try {
                 Thread.sleep(this.sleepTimeMillis);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Synchronizer.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex);
             }
         }
     }
@@ -131,18 +132,19 @@ public class Synchronizer extends Thread {
                     
                     if (lfcRev == null) {
                         //file is in SyncedDevice but not in LFC: copy to lfc
-                        logger.log(Level.INFO, "==> (new file) ({0}) {1} {2} ({3}/{4})", new Object[]{s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit});
+                        
+                        logger.info("==> (new file)"+String.format("%s - %s - %s -%s / %s",  s.getEmail(), syncedShortPath, syncedLFCDir, countFiles ,fileLimit));
                         if(!ignorePath(syncedShortPath)){
                             copyToLFC(syncedShortPath, s, remoteRevision);
                             countFiles++;
                         }
                         else
-                            logger.log(Level.INFO, "Ignoring file {0}", syncedShortPath);
+                            logger.info("Ignoring file"+ syncedShortPath);
                     } else {
                         if (!remoteRevision.equals(lfcRev)) {
                             //(A)
                             //revisions disagree: SyncedDevice must be right because LFC doesn't generate revisions (files in a synchronied LFC directory cannot be modified).
-                            logger.log(Level.INFO, "==x> (SyncedDevice:{0};LFC:{1}) ({2}) {3} {4} file count at this iteration is {5}/{6}", new Object[]{remoteRevision, lfcRev, s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit});
+                            logger.info(String.format("==x> (SyncedDevice:%s;LFC:%s) (%s) %s %s file count at this iteration is %s/%s", remoteRevision, lfcRev, s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
                             lfcu.deleteFromLFC("/" + syncedShortPath, s);
                             if(!ignorePath(syncedShortPath)){
                                 copyToLFC(syncedShortPath, s, remoteRevision);
@@ -151,7 +153,7 @@ public class Synchronizer extends Thread {
                                 countFiles++;
                             }
                             else
-                                logger.log(Level.INFO, "Ignoring file {0}", syncedShortPath);
+                                logger.info(String.format("Ignoring file %s", syncedShortPath));
                             
                         } else {
                             //revisions are identical: do nothing
@@ -159,7 +161,7 @@ public class Synchronizer extends Thread {
                         }
                     }
                 } else {
-                    logger.log(Level.INFO, "Reached {0} files for user {1} at this iteration: skipping", new Object[]{countFiles, s.getEmail()});
+                    logger.info(String.format("Reached %s files for user %s at this iteration: skipping", countFiles, s.getEmail()));
                 }
             }
 
@@ -175,7 +177,7 @@ public class Synchronizer extends Thread {
                         //file is in LFC but not in SyncedDevice
                         if (lfcRev.equals("")) {
                             //if LFC file has no revision: copy to SyncedDevice
-                            logger.log(Level.INFO, "<== (new file) / ({0}) {1} ({2}/{3})", new Object[]{s.getEmail(), lfcPath, countFiles, fileLimit});
+                            logger.info(String.format( "<== (new file) / (%s) %s (%s/%s)",s.getEmail(), lfcPath, countFiles, fileLimit));
                             createLocalDir(PathUtils.getDirFromPath(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd)));
                             lfcu.getLFCFile(lfcPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd)), s);//  lfcPath, sd),ua);
                             sd.putFile(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd), PathUtils.getSyncShortFromLFCShort(lfcPath));//"/"+PathUtils.removeSyncedDir(PathUtils.getL(lfcPath, sd),ua));
@@ -183,7 +185,7 @@ public class Synchronizer extends Thread {
                             countFiles++;
                         } else {  
                             //file has a revision in LFC: it used to be in SyncedDevice but was removed: remove from LFC.
-                            logger.log(Level.INFO, "==x ({0}) {1}/{2} ({3}/{4})", new Object[]{s.getEmail(), syncedLFCDir, lfcPath, countFiles, fileLimit});
+                            logger.info(String.format("==x (%s) %s/%s (%s/%s)", s.getEmail(), syncedLFCDir, lfcPath, countFiles, fileLimit));
                             lfcu.deleteFromLFC("/" + lfcPath, s);
                             countFiles++;
                         }
@@ -191,14 +193,14 @@ public class Synchronizer extends Thread {
                     } else {
                         if (lfcRev.equals("")) { //rev "" means the file is there but has no rev. It was never synced with the SyncedDevice.
                             //file is in LFC with no rev and it is also in SyncedDevice. Something wrong must have happened. Assumes syncedDevice is right.
-                            logger.log(Level.INFO, "==x> (no revision in LFC) ({0}) {1} {2} ({3}/{4})", new Object[]{s.getEmail(), lfcPath, syncedLFCDir, countFiles, fileLimit});
+                            logger.info(String.format("==x> (no revision in LFC) (%s) %s %s (%s/%s)", s.getEmail(), lfcPath, syncedLFCDir, countFiles, fileLimit));
                             lfcu.deleteFromLFC("/" + lfcPath, s);
                             copyToLFC(PathUtils.getSyncShortFromLFCShort(lfcPath), s, remoteRevision);
                             countFiles++;
                         } else {
                             if (!lfcRev.equals(remoteRevision)) {
                                 //revisions disagree: do nothing, it should have been handled in (A)
-                                logger.log(Level.INFO, "oops (SyncedDevice:{0};LFC:{1}) ({2}) {3}: this is not supposed to happen at this point...", new Object[]{remoteRevision, lfcRev, s.getEmail(), lfcPath});
+                                logger.info(String.format("oops (SyncedDevice:%s;LFC:%s) (%s) %s: this is not supposed to happen at this point...", remoteRevision, lfcRev, s.getEmail(), lfcPath));
                             } else {
                                 //revisions are the same: do nothing
                                 //logger.info("== "+lfcPath+" is in sync in Dropbox");
@@ -207,9 +209,9 @@ public class Synchronizer extends Thread {
                     }
                 } else {
                     if(ignorePath(q.getKey()))
-                        logger.log(Level.INFO, "Ignoring file {0}", q.getKey());
+                        logger.info( String.format("Ignoring file %s", q.getKey()));
                         else
-                    logger.log(Level.INFO, "Reached {0} files for user {1} at this iteration: skipping", new Object[]{countFiles, s.getEmail()});
+                    logger.info(String.format("Reached %s files for user %s at this iteration: skipping", countFiles, s.getEmail()));
                 }
             }
         }

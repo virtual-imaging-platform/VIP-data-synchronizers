@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * The SSH device.
@@ -45,7 +45,7 @@ public class SSHDevice implements SyncedDevice {
     private final String LOCAL_TEMP_BASE;
     private String LOCAL_TEMP;
 
-    private static final Logger logger = Logger.getLogger("SSHDevice");
+    private final static Logger logger = Logger.getLogger(SSHDevice.class);
 
     /**
      * Constructor.
@@ -205,7 +205,7 @@ public class SSHDevice implements SyncedDevice {
             jsch.addIdentity(privateKeyFile, privateKeyPass);
 
         } catch (JSchException ex) {
-            Logger.getLogger(Agent.class.getName()).log(Level.SEVERE, null, ex);
+             java.util.logging.Logger.getLogger(Agent.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
             session = jsch.getSession(user, hostname, port);
@@ -213,7 +213,7 @@ public class SSHDevice implements SyncedDevice {
 
             session.connect();
         } catch (JSchException ex) {
-            Logger.getLogger(Agent.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Agent.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

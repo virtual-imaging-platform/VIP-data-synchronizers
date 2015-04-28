@@ -10,7 +10,7 @@ import fr.insalyon.creatis.grida.common.bean.GridData;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * A utility class to interact with the LFC.
@@ -25,7 +25,7 @@ public class LFCUtils {
 
     private final GRIDAClient gc; // will be used for all operations
 
-    private static final Logger logger = Logger.getLogger("LFCUtils");
+    private static final Logger logger = Logger.getLogger( LFCUtils.class);
 
     /**
      * Constructor.
