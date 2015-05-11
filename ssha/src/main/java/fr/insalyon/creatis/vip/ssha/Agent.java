@@ -39,9 +39,10 @@ public class Agent {
 
     public static void main(String[] args) throws IOException, JSchException, SftpException, SyncException {
 
-        loadConfigurationFile();
+        
         System.setProperty("logfile.name", "/home/boujelben/.ssha/ssha.log");
         logger = Logger.getLogger(Agent.class);
+        loadConfigurationFile();
 
         SSHDevice sshd = new SSHDevice(privKeyFile, privKeyPass, LOCAL_TEMP, url, userName, password);
         Synchronizer s = new Synchronizer((SyncedDevice) sshd, gridaHost, gridaPort, gridaProxy, maxFilesIteration, sleepTimeMillis);

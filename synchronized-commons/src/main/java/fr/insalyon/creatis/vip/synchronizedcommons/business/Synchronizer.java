@@ -81,19 +81,24 @@ public class Synchronizer extends Thread {
                 try {
                     if (s.isValidated() && !s.getAuthFailed()) {
                         doSync(s);
+                    } else if (s.isValidated() && s.getAuthFailed()) {
+
+                        if (sd.doWhenFailed(s)) {
+                            doSync(s);
+                        }
                     }
                 } catch (SyncException ex) {
-                    logger.error("Problem synchronizing user account {0}: {1} "+ex.getMessage());
+                    logger.error("Problem synchronizing user account {0}: {1} " + ex.getMessage());
                     ex.printStackTrace();
                     if (ex.getMessage().contains(sd.getAuthFailedString())) {
-                        logger.info("Marking failed authentication for user {0}"+ s.toString());
+                        logger.info("Marking failed authentication for user {0}" + s.toString());
                         try {
                             sd.setAuthFailed(s);
                         } catch (SyncException ex1) {
-                            logger.error("Cannot mark failed authentication for user {0}"+ s.toString());
+                            logger.error("Cannot mark failed authentication for user {0}" + s.toString());
                             ex.printStackTrace();
                         }
-                    } 
+                    }
                 }
 
             }

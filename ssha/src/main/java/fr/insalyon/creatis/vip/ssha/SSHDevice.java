@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 public class SSHDevice implements SyncedDevice {
 
     private Session session;
-
+    private int i=1;
     //ssh config
     private SSHSynchronization account;
     private String remoteDir;
@@ -253,4 +253,24 @@ public class SSHDevice implements SyncedDevice {
             throw new SyncException(ex);
         }
     }
+
+    @Override
+    public boolean doWhenFailed(Synchronization ua) {
+        boolean k=false;
+        try {
+            if(SSHMySQLDAO.getInstance(jdbcUrl, username, password).testTheEarliestNextSynchronistation(ua)){
+                k= true;
+               SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateTheEarliestNextSynchronistation(ua);
+               logger.error(i);
+            }
+        } catch (SyncException ex) {
+            java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            //SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateTheEarliestNextSynchronistation(20, ua);
+            
+        return k;
+       
+       
+    }
+    
 }

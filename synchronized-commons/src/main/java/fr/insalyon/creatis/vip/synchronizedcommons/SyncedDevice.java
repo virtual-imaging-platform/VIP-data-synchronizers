@@ -85,4 +85,7 @@ public interface SyncedDevice {
      */
     public String getAuthFailedString();
     
+    
+    public boolean doWhenFailed(Synchronization s);
+    
 }
