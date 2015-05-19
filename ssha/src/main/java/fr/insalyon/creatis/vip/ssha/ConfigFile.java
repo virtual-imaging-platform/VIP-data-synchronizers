@@ -29,7 +29,7 @@ public class  ConfigFile {
     private  String url;
     private  String userName;
     private  String password;
-    private  String fileLoggerPath;
+   
    
     /**
      *
@@ -45,8 +45,7 @@ public class  ConfigFile {
 
     private ConfigFile() {
         try {
-            config = new PropertiesConfiguration(new File(configFile));
-            fileLoggerPath = config.getString("ssha.file.log", "/home/boujelben/.ssha/ssha.log");
+            config = new PropertiesConfiguration(new File(configFile));            
             gridaHost = config.getString("ssha.grida.host", "kingkong.grid.creatis.insa-lyon.fr");
             gridaPort = config.getInt("ssha.grida.port", 9006);
             gridaProxy = config.getString("ssha.grida.proxy", "/root/.vip/proxies/x509up_server");
@@ -59,7 +58,6 @@ public class  ConfigFile {
             userName = config.getString("ssha.db.user", "vip");
             password = config.getString("ssha.db.password", "changeit");
 
-            config.setProperty("ssha.file.log", fileLoggerPath);
             config.setProperty("ssha.grida.host", gridaHost);
             config.setProperty("ssha.grida.port", gridaPort);
             config.setProperty("ssha.grida.proxy", gridaProxy);
@@ -254,19 +252,4 @@ public class  ConfigFile {
         this.password = password;
     }
 
-    /**
-     *
-     * @return 
-     */
-    public String getFileLoggerPath() {
-        return fileLoggerPath;
-    }
-
-    /**
-     *
-     * @param fileLoggerPath the path of the logger file
-     */
-    public void setFileLoggerPath(String fileLoggerPath) {
-        this.fileLoggerPath = fileLoggerPath;
-    }
 }
