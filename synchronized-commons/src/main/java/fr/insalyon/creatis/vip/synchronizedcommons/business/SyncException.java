@@ -6,10 +6,12 @@ package fr.insalyon.creatis.vip.synchronizedcommons.business;
 
 /**
  * Exception class.
+ *
  * @author Tristan Glatard
  */
 public class SyncException extends Exception {
-     public SyncException(String message) {
+
+    public SyncException(String message) {
         super(message);
     }
 

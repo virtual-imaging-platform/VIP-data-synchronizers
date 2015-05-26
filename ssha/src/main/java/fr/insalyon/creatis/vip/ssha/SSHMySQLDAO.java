@@ -36,6 +36,14 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         createTable();
     }
 
+    /**
+     *
+     * @param jdbcUrl
+     * @param userName
+     * @param password
+     * @return
+     * @throws SyncException
+     */
     public static SSHMySQLDAO getInstance(String jdbcUrl, String userName, String password) throws SyncException {
         try {
             if (instance == null) {
@@ -130,6 +138,10 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
     }
 
+    /**
+     *
+     * @return
+     */
     public Connection getConnection() {
         return connection;
     }
@@ -155,32 +167,26 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         }
     }
 
-    public void updateTheEarliestNextSynchronistation(Synchronization ua) throws SyncException {
+    /**
+     *
+     * @param ua
+     * @throws SyncException
+     */
+    public void updateTheEarliestNextSynchronistation(Synchronization ua, long duration) throws SyncException {
 
-        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime());
 
         try {
 
-            PreparedStatement ps2 = connection.prepareStatement("select "
-                    + " numberSynchronizationFailed from VIPSSHAccounts "
-                    + "WHERE email = ? and LFCDir=?");
-            ps2.setString(1, ua.getEmail());
-            ps2.setString(2, ua.getSyncedLFCDir());
-            ResultSet rs2 = ps2.executeQuery();
-            int minute = 0;
-            while (rs2.next()) {
-                minute = rs2.getInt("numberSynchronizationFailed");
-            }
-            int duration = (minute * 60) * 1000;
+            //int duration = (minute * 60) * 1000;
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "VIPSSHAccounts SET "
                     + "theEarliestNextSynchronistation = ?, numberSynchronizationFailed=? "
                     + "WHERE email = ? and LFCDir=?");
 
-            newTime.setTime(currentTimestamp.getTime() + duration);
+            newTime.setTime(duration);
             ps.setTimestamp(1, newTime);
-            ps.setInt(2, minute + 1);
+            ps.setInt(2, getNumberSynchronizationFailed(ua) + 1);
             ps.setString(3, ua.getEmail());
             ps.setString(4, ua.getSyncedLFCDir());
             ps.executeUpdate();
@@ -192,9 +198,13 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
     }
 
-    public boolean testTheEarliestNextSynchronistation(Synchronization ua) throws SyncException {
-
-        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+    /**
+     *
+     * @param ua
+     * @return
+     * @throws SyncException
+     */
+    public Timestamp getTheEarliestNextSynchronistation(Synchronization ua) throws SyncException {
 
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT "
@@ -209,17 +219,50 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             while (rs.next()) {
                 date = rs.getTimestamp("theEarliestNextSynchronistation");
             }
-
             ps.close();
-            if (date.before(currentTimestamp) || date.equals(currentTimestamp)) {
-                return true;
-            } else {
-                return false;
-            }
+            return date;
 
         } catch (SQLException ex) {
             throw new SyncException(ex);
         }
 
+    }
+
+    /**
+     *
+     * @param ua
+     * @return
+     * @throws SyncException
+     */
+    public boolean compareTheEarliestNextSynchronistation(Synchronization ua) throws SyncException {
+
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+
+        if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public int getNumberSynchronizationFailed(Synchronization ua) throws SyncException {
+
+        try {
+
+            PreparedStatement ps2 = connection.prepareStatement("select "
+                    + " numberSynchronizationFailed from VIPSSHAccounts "
+                    + "WHERE email = ? and LFCDir=?");
+            ps2.setString(1, ua.getEmail());
+            ps2.setString(2, ua.getSyncedLFCDir());
+            ResultSet rs2 = ps2.executeQuery();
+            int minute = 0;
+            while (rs2.next()) {
+                minute = rs2.getInt("numberSynchronizationFailed");
+            }
+            return minute;
+        } catch (SQLException ex) {
+            throw new SyncException(ex);
+        }
     }
 }

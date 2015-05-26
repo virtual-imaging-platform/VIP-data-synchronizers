@@ -10,82 +10,111 @@ import java.util.List;
 
 /**
  * Interface for synchronized devices.
+ *
  * @author Tristan Glatard
  */
 public interface SyncedDevice {
-   
+
     /**
      * Lists all the files in a remote directory, with their revisions.
+     *
      * @param remoteDir short path of the remote directory.
      * @return
-     * @throws SyncException 
+     * @throws SyncException
      */
-    public HashMap<String,String> listFiles(String remoteDir) throws SyncException;
-    
+    public HashMap<String, String> listFiles(String remoteDir) throws SyncException;
+
     /**
      * Copies a remote file to a local directory.
+     *
      * @param remoteFile short path of the remote file
      * @param localDir local directory where to copy the file
-     * @throws SyncException 
+     * @throws SyncException
      */
     public void getFile(String remoteFile, String localDir) throws SyncException;
-    
+
     /**
      * Copies a local file to a remote directory.
+     *
      * @param localFile absolute path of the local file.
      * @param remoteDir short path of the remote directory.
-     * @throws SyncException 
+     * @throws SyncException
      */
     public void putFile(String localFile, String remoteDir) throws SyncException;
-    
+
     /**
      * Sets the 'authfailed' flag for the synchronization.
+     *
      * @param s
-     * @throws SyncException 
+     * @throws SyncException
      */
     public void setAuthFailed(Synchronization s) throws SyncException;
-    
+
     /**
      * Sets the 'validated' flag for the synchronization.
+     *
      * @param s
-     * @throws SyncException 
+     * @throws SyncException
      */
     public void validateSynchronization(Synchronization s) throws SyncException;
-    
+
     /**
      * Gets all the synchronizations on this device.
-     * @return 
-     * @throws SyncException 
+     *
+     * @return
+     * @throws SyncException
      */
     public List<Synchronization> getSynchronization() throws SyncException;
-    
+
     /**
      * Gets the revision of a remote file.
+     *
      * @param remoteFile short path of the remote file.
      * @return
-     * @throws SyncException 
+     * @throws SyncException
      */
     public String getRevision(String remoteFile) throws SyncException;
-    
+
     /**
      * Sets the synchronization to use.
-     * @param s 
+     *
+     * @param s
      */
     public void setSynchronization(Synchronization s);
-    
+
     /**
      * The temporary directory where to store files locally.
-     * @return 
+     *
+     * @return
      */
     public String getTempDir();
-    
+
     /**
      * A string contained in the "authentication failed" error message.
-     * @return 
+     *
+     * @return
      */
     public String getAuthFailedString();
-    
-    
-    public boolean doWhenFailed(Synchronization s);
-    
+
+    /**
+     *
+     * @param ua
+     * @return true if theEarliestNextSynchronisation is before or equal to the current date
+     */
+    public boolean compareTheEarliestNextSynchronisation(Synchronization ua);
+
+    /**
+     *
+     * @param ua
+     * @return the number of failed Synchronisation
+     */
+    public int getNumberFailedSynchronisation(Synchronization ua);
+
+    /**
+     *
+     * @param ua 
+     * @param duration the time will added to the current date to update the "theEarliestNextSynchronisation"
+     */
+    public void updateTheEarliestNextSynchronisation(Synchronization ua, long duration);
+
 }
