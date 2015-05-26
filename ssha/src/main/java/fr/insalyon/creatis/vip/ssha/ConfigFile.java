@@ -13,27 +13,26 @@ import org.apache.commons.configuration.PropertiesConfiguration;
  *
  * @author Nouha Boujelben
  */
-public class  ConfigFile {
+public class ConfigFile {
 
     PropertiesConfiguration config;
     private static final String configFile = "./ssha.conf";
     private static ConfigFile instance;
-    private  String gridaHost;
-    private  int gridaPort;
-    private  String gridaProxy;
-    private  String LOCAL_TEMP;
-    private  long sleepTimeMillis;
-    private  int maxFilesIteration = 10;
-    private  String privKeyFile;
-    private  String privKeyPass;
-    private  String url;
-    private  String userName;
-    private  String password;
-   
-   
+    private String gridaHost;
+    private int gridaPort;
+    private String gridaProxy;
+    private String LOCAL_TEMP;
+    private long sleepTimeMillis;
+    private int maxFilesIteration = 10;
+    private String privKeyFile;
+    private String privKeyPass;
+    private String url;
+    private String userName;
+    private String password;
+
     /**
      *
-     * @return
+     * @return instance of the configure file
      */
     public static ConfigFile getInstance() {
         if (instance == null) {
@@ -41,11 +40,10 @@ public class  ConfigFile {
         }
         return instance;
     }
-   
 
     private ConfigFile() {
         try {
-            config = new PropertiesConfiguration(new File(configFile));            
+            config = new PropertiesConfiguration(new File(configFile));
             gridaHost = config.getString("ssha.grida.host", "kingkong.grid.creatis.insa-lyon.fr");
             gridaPort = config.getInt("ssha.grida.port", 9006);
             gridaProxy = config.getString("ssha.grida.proxy", "/root/.vip/proxies/x509up_server");
@@ -70,25 +68,25 @@ public class  ConfigFile {
             config.setProperty("ssha.db.user", userName);
             config.setProperty("ssha.db.password", password);
             config.save();
-            
+
         } catch (ConfigurationException ex) {
-         System.out.println(ex.getMessage());
+            System.out.println(ex.getMessage());
         }
     }
-    
+
     /**
      *
      * @return
      */
-    public  String getGridaHost() {
+    public String getGridaHost() {
         return gridaHost;
     }
 
     /**
      *
-     * @param gridaHost
+     * @param gridaHost grida Host
      */
-    public  void setGridaHost(String gridaHost) {
+    public void setGridaHost(String gridaHost) {
         this.gridaHost = gridaHost;
     }
 
@@ -102,7 +100,7 @@ public class  ConfigFile {
 
     /**
      *
-     * @param gridaPort
+     * @param gridaPort grida port
      */
     public void setGridaPort(int gridaPort) {
         this.gridaPort = gridaPort;
@@ -112,13 +110,13 @@ public class  ConfigFile {
      *
      * @return
      */
-    public  String getGridaProxy() {
+    public String getGridaProxy() {
         return gridaProxy;
     }
 
     /**
      *
-     * @param gridaProxy
+     * @param gridaProxy grida proxy
      */
     public void setGridaProxy(String gridaProxy) {
         this.gridaProxy = gridaProxy;
@@ -160,7 +158,7 @@ public class  ConfigFile {
      *
      * @return
      */
-    public  int getMaxFilesIteration() {
+    public int getMaxFilesIteration() {
         return maxFilesIteration;
     }
 
@@ -240,7 +238,7 @@ public class  ConfigFile {
      *
      * @return
      */
-    public  String getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -248,7 +246,7 @@ public class  ConfigFile {
      *
      * @param password
      */
-    public  void setPassword(String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
