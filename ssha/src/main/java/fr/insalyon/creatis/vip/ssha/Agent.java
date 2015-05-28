@@ -27,7 +27,7 @@ public class Agent {
     public static void main(String[] args) throws IOException, JSchException, SftpException, SyncException {
         
       
-        System.setProperty("logfile.name", "./logger.log");
+        System.setProperty("logfile.name", "./ssha.log");
         ConfigFile.getInstance();
         final Logger logger = Logger.getLogger(Agent.class);
         SSHDevice sshd = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());

@@ -234,14 +234,14 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
      * @return
      * @throws SyncException
      */
-    public boolean compareTheEarliestNextSynchronistation(Synchronization ua) throws SyncException {
+    public boolean mustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException {
 
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 
         if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
-            return true;
-        } else {
             return false;
+        } else {
+            return true;
         }
 
     }
@@ -261,6 +261,26 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
                 minute = rs2.getInt("numberSynchronizationFailed");
             }
             return minute;
+        } catch (SQLException ex) {
+            throw new SyncException(ex);
+        }
+    }
+
+    public void setNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
+
+        try {
+
+            PreparedStatement ps = connection.prepareStatement("UPDATE "
+                    + "VIPSSHAccounts SET "
+                    + "numberSynchronizationFailed=? "
+                    + "WHERE email = ? and LFCDir=?");
+
+            ps.setInt(1, number);
+            ps.setString(2, ua.getEmail());
+            ps.setString(3, ua.getSyncedLFCDir());
+            ps.executeUpdate();
+            ps.close();
+
         } catch (SQLException ex) {
             throw new SyncException(ex);
         }

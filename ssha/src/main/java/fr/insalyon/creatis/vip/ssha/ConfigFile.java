@@ -29,6 +29,9 @@ public class ConfigFile {
     private String url;
     private String userName;
     private String password;
+    private int exponentielBackOffnumberMinute;
+
+    
 
     /**
      *
@@ -55,6 +58,7 @@ public class ConfigFile {
             url = config.getString("ssha.db.jdbcurl", "jdbc:mysql://localhost:3306/vip");
             userName = config.getString("ssha.db.user", "vip");
             password = config.getString("ssha.db.password", "changeit");
+            exponentielBackOffnumberMinute=config.getInt("ssha.exponentielBackOff.minute", 1);
 
             config.setProperty("ssha.grida.host", gridaHost);
             config.setProperty("ssha.grida.port", gridaPort);
@@ -67,6 +71,7 @@ public class ConfigFile {
             config.setProperty("ssha.db.jdbcurl", url);
             config.setProperty("ssha.db.user", userName);
             config.setProperty("ssha.db.password", password);
+            config.setProperty("ssha.exponentielBackOff.minute", exponentielBackOffnumberMinute);
             config.save();
 
         } catch (ConfigurationException ex) {
@@ -248,6 +253,14 @@ public class ConfigFile {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public int getExponentielBackOffnumberMinute() {
+        return exponentielBackOffnumberMinute;
+    }
+
+    public void setExponentielBackOffnumberMinute(int exponentielBackOffnumberMinute) {
+        this.exponentielBackOffnumberMinute = exponentielBackOffnumberMinute;
     }
 
 }

@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 public class SSHDevice implements SyncedDevice {
 
     private Session session;
-    private int i = 1;
+   
     //ssh config
     private SSHSynchronization account;
     private String remoteDir;
@@ -254,9 +254,9 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public boolean compareTheEarliestNextSynchronisation(Synchronization ua) {
+    public boolean mustWaitBeforeNextSynchronization(Synchronization ua) {
         try {
-            return SSHMySQLDAO.getInstance(jdbcUrl, username, password).compareTheEarliestNextSynchronistation(ua);
+            return SSHMySQLDAO.getInstance(jdbcUrl, username, password).mustWaitBeforeNextSynchronization(ua);
         } catch (SyncException ex) {
             java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -265,7 +265,7 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public int getNumberFailedSynchronisation(Synchronization ua) {
+    public int getNumberFailedSynchronization(Synchronization ua) {
         try {
             return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getNumberSynchronizationFailed(ua);
         } catch (SyncException ex) {
@@ -275,12 +275,28 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public void updateTheEarliestNextSynchronisation(Synchronization ua, long duration) {
+    public void updateTheEarliestNextSynchronization(Synchronization ua, long duration) {
         try {
             SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateTheEarliestNextSynchronistation(ua, duration);
         } catch (SyncException ex) {
             java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    @Override
+    public void setNumberFailedSynchronization(Synchronization ua, int number) {
+       try {
+            SSHMySQLDAO.getInstance(jdbcUrl, username, password).setNumberSynchronizationFailed(ua, number);
+        } catch (SyncException ex) {
+            java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public int getNumberOfMinuteFromConfigFile() {
+       return ConfigFile.getInstance().getExponentielBackOffnumberMinute();
+    }
+    
+    
 
 }

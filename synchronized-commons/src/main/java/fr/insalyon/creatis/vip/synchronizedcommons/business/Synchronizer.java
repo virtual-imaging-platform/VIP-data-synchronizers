@@ -86,10 +86,17 @@ public class Synchronizer extends Thread {
                     if (s.isValidated()) {
                         if (!s.getAuthFailed()) {
                             doSync(s);
+                            //if synchronization failed 
                         } else if (s.getAuthFailed()) {
-                            if (sd.compareTheEarliestNextSynchronisation(s)) {
-                                exponentionlBackOff(sd, s);
+                            //check the date of the earliest synchronization and if it is after the current date this method return true
+                            if (!sd.mustWaitBeforeNextSynchronization(s)) {
+                                //update the earlisNextSynchroniisation with the ExponentialBackoff algorithm
+                                updateExponentialBackoff(sd, s);
                                 doSync(s);
+                                //if the synchronization is ok, set the number of failed Synchronization to zero
+                                if (!s.getAuthFailed()) {
+                                    sd.setNumberFailedSynchronization(s, 0);
+                                }
                             }
                         }
                     }
@@ -142,7 +149,7 @@ public class Synchronizer extends Thread {
                 String lfcRev = lfcFiles.get(syncedShortPath);
 
                 if (lfcRev == null) {
-                        //file is in SyncedDevice but not in LFC: copy to lfc
+                    //file is in SyncedDevice but not in LFC: copy to lfc
 
                     logger.info("==> (new file)" + String.format("%s - %s - %s -%s / %s", s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
                     if (!ignorePath(syncedShortPath)) {
@@ -153,7 +160,7 @@ public class Synchronizer extends Thread {
                     }
                 } else {
                     if (!remoteRevision.equals(lfcRev)) {
-                            //(A)
+                        //(A)
                         //revisions disagree: SyncedDevice must be right because LFC doesn't generate revisions (files in a synchronied LFC directory cannot be modified).
                         logger.info(String.format("==x> (SyncedDevice:%s;LFC:%s) (%s) %s %s file count at this iteration is %s/%s", remoteRevision, lfcRev, s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
                         lfcu.deleteFromLFC("/" + syncedShortPath, s);
@@ -167,7 +174,7 @@ public class Synchronizer extends Thread {
                         }
 
                     } else {
-                            //revisions are identical: do nothing
+                        //revisions are identical: do nothing
                         //logger.info("== "+boxPath+" is in sync in LFC");
                     }
                 }
@@ -213,7 +220,7 @@ public class Synchronizer extends Thread {
                             //revisions disagree: do nothing, it should have been handled in (A)
                             logger.info(String.format("oops (SyncedDevice:%s;LFC:%s) (%s) %s: this is not supposed to happen at this point...", remoteRevision, lfcRev, s.getEmail(), lfcPath));
                         } else {
-                                //revisions are the same: do nothing
+                            //revisions are the same: do nothing
                             //logger.info("== "+lfcPath+" is in sync in Dropbox");
                         }
                     }
@@ -258,9 +265,9 @@ public class Synchronizer extends Thread {
         return false;
     }
 
-    private void exponentionlBackOff(SyncedDevice sd, Synchronization ua) {
+    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
-        sd.updateTheEarliestNextSynchronisation(ua, currentTimestamp.getTime() + (sd.getNumberFailedSynchronisation(ua) * 60 * 1000));
+        sd.updateTheEarliestNextSynchronization(ua, currentTimestamp.getTime() +(int)Math.pow(sd.getNumberOfMinuteFromConfigFile() *60 * 1000,sd.getNumberFailedSynchronization(ua)));
 
     }
 

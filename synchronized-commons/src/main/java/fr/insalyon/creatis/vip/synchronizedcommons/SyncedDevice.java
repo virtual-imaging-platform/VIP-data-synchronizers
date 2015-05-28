@@ -99,22 +99,28 @@ public interface SyncedDevice {
     /**
      *
      * @param ua
-     * @return true if theEarliestNextSynchronisation is before or equal to the current date
+     * @return false if theEarliestNextSynchronization is before or equal to the current date
      */
-    public boolean compareTheEarliestNextSynchronisation(Synchronization ua);
+    public boolean mustWaitBeforeNextSynchronization(Synchronization ua);
 
     /**
      *
      * @param ua
-     * @return the number of failed Synchronisation
+     * @return the number of failed Synchronization
      */
-    public int getNumberFailedSynchronisation(Synchronization ua);
+    public int getNumberFailedSynchronization(Synchronization ua);
+    
+    
+    public void setNumberFailedSynchronization(Synchronization ua, int number);
 
     /**
      *
      * @param ua 
-     * @param duration the time will added to the current date to update the "theEarliestNextSynchronisation"
+     * @param duration the time will added to the current date to update the "theEarliestNextSynchronization"
      */
-    public void updateTheEarliestNextSynchronisation(Synchronization ua, long duration);
+    public void updateTheEarliestNextSynchronization(Synchronization ua, long duration);
+    
+    
+    public int getNumberOfMinuteFromConfigFile();
 
 }
