@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
  * DAO for SSH synchronizations.
  *
  * @author Tristan Glatard
+ * @author Nouha Boujelben
  */
 public class SSHMySQLDAO implements SyncedDeviceDAO {
 
@@ -80,11 +81,29 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
     }
 
     @Override
-    public void setAuthFailed(Synchronization ua) throws SyncException {
+    public void setSynchronizationNotFailed(Synchronization ua) throws SyncException {
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "VIPSSHAccounts SET "
-                    + "auth_failed = '1' "
+                    + "synch_failed = '0' "
+                    + "WHERE email = ? and LFCDir=?");
+
+            ps.setString(1, ua.getEmail());
+            ps.setString(2, ua.getSyncedLFCDir());
+            ps.executeUpdate();
+            ps.close();
+
+        } catch (SQLException ex) {
+            throw new SyncException(ex);
+        }
+    }
+
+    @Override
+    public void setSynchronizationFailed(Synchronization ua) throws SyncException {
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE "
+                    + "VIPSSHAccounts SET "
+                    + "synch_failed = '1' "
                     + "WHERE email = ? and LFCDir=?");
 
             ps.setString(1, ua.getEmail());
@@ -109,7 +128,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
             while (rs.next()) {
                 String val = rs.getString("validated");
-                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),
+                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("synch_failed"), rs.getString("LFCDir"),
                         rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"));
                 userAccounts.add(ua);
             }
@@ -128,7 +147,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             Statement stat = connection.createStatement();
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
-                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + " synch_failed BOOLEAN, theEarliestNextSynchronistation timestamp, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
 
             logger.info("Table VIPSSHAccounts successfully created.");
 
@@ -181,14 +200,13 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             //int duration = (minute * 60) * 1000;
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "VIPSSHAccounts SET "
-                    + "theEarliestNextSynchronistation = ?, numberSynchronizationFailed=? "
+                    + "theEarliestNextSynchronistation = ?"
                     + "WHERE email = ? and LFCDir=?");
 
             newTime.setTime(duration);
             ps.setTimestamp(1, newTime);
-            ps.setInt(2, getNumberSynchronizationFailed(ua) + 1);
-            ps.setString(3, ua.getEmail());
-            ps.setString(4, ua.getSyncedLFCDir());
+            ps.setString(2, ua.getEmail());
+            ps.setString(3, ua.getSyncedLFCDir());
             ps.executeUpdate();
             ps.close();
 
@@ -266,7 +284,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         }
     }
 
-    public void setNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
+    public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
 
         try {
 

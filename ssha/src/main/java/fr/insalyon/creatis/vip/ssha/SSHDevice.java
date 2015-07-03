@@ -24,7 +24,8 @@ import org.apache.log4j.Logger;
 /**
  * The SSH device.
  *
- * @author Tristan Glatard tristan.glatard@creatis.insa-lyon.fr
+ * @author Tristan Glatard tristan.glatard@creatis.insa-lyon.fr,
+ * @author Nouha Boujelben nouha.boujelben@creatis.insa-lyon.fr
  */
 public class SSHDevice implements SyncedDevice {
 
@@ -128,10 +129,15 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public void setAuthFailed(Synchronization ua) throws SyncException {
-        SSHMySQLDAO.getInstance(jdbcUrl, username, password).setAuthFailed(ua);
+    public void setSynchronizationFailed(Synchronization ua) throws SyncException {
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).setSynchronizationFailed(ua);
     }
-
+    
+    @Override
+    public void setSynchronizationNotFailed(Synchronization ua) throws SyncException {
+         SSHMySQLDAO.getInstance(jdbcUrl, username, password).setSynchronizationNotFailed(ua);
+    }
+    
     @Override
     public void validateSynchronization(Synchronization ua) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -265,7 +271,7 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public int getNumberFailedSynchronization(Synchronization ua) {
+    public int getNumberSynchronizationFailed(Synchronization ua) {
         try {
             return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getNumberSynchronizationFailed(ua);
         } catch (SyncException ex) {
@@ -284,19 +290,19 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public void setNumberFailedSynchronization(Synchronization ua, int number) {
+    public void updateNumberSynchronizationFailed(Synchronization ua, int number) {
        try {
-            SSHMySQLDAO.getInstance(jdbcUrl, username, password).setNumberSynchronizationFailed(ua, number);
+            SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateNumberSynchronizationFailed(ua, number);
         } catch (SyncException ex) {
             java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    public int getNumberOfMinuteFromConfigFile() {
-       return ConfigFile.getInstance().getExponentielBackOffnumberMinute();
+    public double getSlotTimeFromConfigFile() {
+       return ConfigFile.getInstance().getSlotTime();
     }
-    
-    
 
+    
+    
 }

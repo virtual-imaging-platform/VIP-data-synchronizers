@@ -11,7 +11,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
  *
- * @author Nouha Boujelben
+ * @author Nouha Boujelben nouha.boujelben@creatis.insa-lyon.fr
  */
 public class ConfigFile {
 
@@ -29,9 +29,7 @@ public class ConfigFile {
     private String url;
     private String userName;
     private String password;
-    private int exponentielBackOffnumberMinute;
-
-    
+    private double slotTime;
 
     /**
      *
@@ -58,7 +56,7 @@ public class ConfigFile {
             url = config.getString("ssha.db.jdbcurl", "jdbc:mysql://localhost:3306/vip");
             userName = config.getString("ssha.db.user", "vip");
             password = config.getString("ssha.db.password", "changeit");
-            exponentielBackOffnumberMinute=config.getInt("ssha.exponentielBackOff.minute", 1);
+            slotTime = config.getDouble("ssha.exponentielBackOff.slotTime", 0.0512);
 
             config.setProperty("ssha.grida.host", gridaHost);
             config.setProperty("ssha.grida.port", gridaPort);
@@ -71,7 +69,7 @@ public class ConfigFile {
             config.setProperty("ssha.db.jdbcurl", url);
             config.setProperty("ssha.db.user", userName);
             config.setProperty("ssha.db.password", password);
-            config.setProperty("ssha.exponentielBackOff.minute", exponentielBackOffnumberMinute);
+            config.setProperty("ssha.exponentielBackOff.minute", slotTime);
             config.save();
 
         } catch (ConfigurationException ex) {
@@ -255,12 +253,21 @@ public class ConfigFile {
         this.password = password;
     }
     
-    public int getExponentielBackOffnumberMinute() {
-        return exponentielBackOffnumberMinute;
-    }
+    /**
+     *
+     * @return the slotTime in millisecond unit
+     */
 
-    public void setExponentielBackOffnumberMinute(int exponentielBackOffnumberMinute) {
-        this.exponentielBackOffnumberMinute = exponentielBackOffnumberMinute;
+    public double getSlotTime() {
+        return slotTime;
+    }
+     
+    /**
+     *
+     * @param slotTime millisecond unit
+     */
+    public void setSlotTime(double slotTime) {
+        this.slotTime = slotTime;
     }
 
 }

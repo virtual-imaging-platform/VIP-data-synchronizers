@@ -136,7 +136,7 @@ public interface SyncedDevice {
 
     /**
      *
-     * @return The slot time used for the exponential back-off algorithm
+     * @return The slot time used for the exponential back-off algorithm 
      */
     public double getSlotTimeFromConfigFile();
 
