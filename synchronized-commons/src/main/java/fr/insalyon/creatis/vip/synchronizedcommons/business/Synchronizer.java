@@ -7,28 +7,28 @@ package fr.insalyon.creatis.vip.synchronizedcommons.business;
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDevice;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
 import java.io.File;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.apache.log4j.Logger;
 
 /**
  *
- * @author Tristan Glatard A Synchronizer is a synchronization agent between an
- * EGI Logical File Catalog and another directory accessible through SSH or
- * Dropbox, specified by the SyncedDevice attribute. Files in a synchronized LFC
- * directory cannot be modified or deleted.
+ * @author Tristan Glatard, Nouha Boujelben
+ *
+ * A Synchronizer is a synchronization agent between an EGI Logical File Catalog
+ * and another directory accessible through SSH or Dropbox, specified by the
+ * SyncedDevice attribute. Files in a synchronized LFC directory cannot be
+ * modified or deleted.
  */
 public class Synchronizer extends Thread {
 
     private final SyncedDevice sd;
     private final int fileLimit;
-
     private final long sleepTimeMillis;
     private final LFCUtils lfcu;        // an object containing methods to transfer files to the synchronized LFC. 
-
     private static final Logger logger = Logger.getLogger(Synchronizer.class);
 
     /**
@@ -57,14 +57,14 @@ public class Synchronizer extends Thread {
      * @throws SyncException
      */
     private void createLocalDir(String localDir) throws SyncException {
-        File dir = new File(localDir.replaceAll("//", "/")); // just in case... 
+
+        File dir = new File(localDir.replaceAll("//", "/"));
+        boolean successful = dir.mkdirs();
         if (dir != null && !dir.exists()) {
-            if (!dir.mkdirs()) {
+            if (!successful) {
                 throw new SyncException("Cannot create local directory " + dir.getAbsolutePath());
             }
-
         }
-
     }
 
     /**
@@ -72,48 +72,59 @@ public class Synchronizer extends Thread {
      */
     @Override
     public void run() {
+        List<Synchronization> synchronizations = null;
+        //rest data base parameters when restart the agent 
+        try {
+            synchronizations = sd.getSynchronization();
+            for (Synchronization s : synchronizations) {
+                sd.setSynchronizationNotFailed(s);
+                sd.updateNumberSynchronizationFailed(s, 0);
+                sd.updateTheEarliestNextSynchronization(s, new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).getTime());
+            }
+        } catch (SyncException ex) {
+            logger.error("Cannot get user accounts: " + ex.getMessage());
+        }
+
         while (true) {
-            List<Synchronization> synchronizations = null;
+
             try {
                 synchronizations = sd.getSynchronization();
             } catch (SyncException ex) {
-                logger.error("Cannot get user accounts: {0}" + ex.getMessage());
-
+                logger.error("Cannot get user accounts: " + ex.getMessage());
                 ex.printStackTrace();
             }
+
             for (Synchronization s : synchronizations) {
                 try {
                     if (s.isValidated()) {
-                        if (!s.getAuthFailed()) {
+                        //if the Synchronization not failed restart the synchronization
+                        if (!s.getSynchronizationFailed()) {
                             doSync(s);
                             //if synchronization failed 
-                        } else if (s.getAuthFailed()) {
-                            //check the date of the earliest synchronization and if it is after the current date this method return true
+                        } else if (s.getSynchronizationFailed()) {
+                            //check the date of the earliest next synchronization and if it is after the current date this method return true
                             if (!sd.mustWaitBeforeNextSynchronization(s)) {
-                                //update the earlisNextSynchroniisation with the ExponentialBackoff algorithm
+                                //update the earlisNextSynchronisation with the ExponentialBackoff algorithm
                                 updateExponentialBackoff(sd, s);
                                 doSync(s);
-                                //if the synchronization is ok, set the number of failed Synchronization to zero
-                                if (!s.getAuthFailed()) {
-                                    sd.setNumberFailedSynchronization(s, 0);
-                                }
+                                //if the synchronization passed, set the number of failed Synchronization to zero
+                                sd.updateNumberSynchronizationFailed(s, 0);
+                                //if the synchronization passed, set the synchronisation not failed
+                                sd.setSynchronizationNotFailed(s);
                             }
                         }
                     }
                 } catch (SyncException ex) {
-                    logger.error("Problem synchronizing user account {0}: {1} " + ex.getMessage());
-                    ex.printStackTrace();
-                    if (ex.getMessage().contains(sd.getAuthFailedString())) {
-                        logger.info("Marking failed authentication for user {0}" + s.toString());
-                        try {
-                            sd.setAuthFailed(s);
-                        } catch (SyncException ex1) {
-                            logger.error("Cannot mark failed authentication for user {0}" + s.toString());
-                            ex.printStackTrace();
-                        }
+                    sd.updateNumberSynchronizationFailed(s, sd.getNumberSynchronizationFailed(s) + 1);
+                    try {
+                        sd.setSynchronizationFailed(s);
+                    } catch (SyncException ex1) {
+                        logger.error("Cannot mark failed Synchronization for user " + s.toString());
+                        ex.printStackTrace();
                     }
+                    logger.error("Problem synchronizing user account: " + s.toString() + ex.getMessage());
+                    ex.printStackTrace();
                 }
-
             }
 
             try {
@@ -131,17 +142,15 @@ public class Synchronizer extends Thread {
      * @throws SyncException
      */
     private void doSync(Synchronization s) throws SyncException {
-
+        logger.info("");
         sd.setSynchronization(s);
         String syncedLFCDir = s.getSyncedLFCDir();
         int countFiles = 0; //this will count how many files are synced for a user
-
         HashMap<String, String> remoteFiles = sd.listFiles("/");
         HashMap<String, String> lfcFiles = lfcu.listLFCDir("/", s);
         if (lfcFiles == null || remoteFiles == null) {
             return;
         }
-
         //SyncedDevice -> LFC
         for (Map.Entry<String, String> p : remoteFiles.entrySet()) {
             if (countFiles < fileLimit) {
@@ -245,6 +254,7 @@ public class Synchronizer extends Thread {
      * @throws SyncException
      */
     private void copyToLFC(String syncedShortPath, Synchronization s, String revision) throws SyncException {
+
         createLocalDir(PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
         sd.getFile(syncedShortPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
         lfcu.copyToLfc(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s), PathUtils.getDirFromPath(PathUtils.getLFCLongFromSyncShort(syncedShortPath, s)));
@@ -267,8 +277,9 @@ public class Synchronizer extends Thread {
 
     private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
-        sd.updateTheEarliestNextSynchronization(ua, currentTimestamp.getTime() +(int)Math.pow(sd.getNumberOfMinuteFromConfigFile() *60 * 1000,sd.getNumberFailedSynchronization(ua)));
+        Random r = new Random();
+        int i1 = r.nextInt((int) Math.pow(2, sd.getNumberSynchronizationFailed(ua)));
+        sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + i1 * sd.getSlotTimeFromConfigFile()));
 
     }
-
 }

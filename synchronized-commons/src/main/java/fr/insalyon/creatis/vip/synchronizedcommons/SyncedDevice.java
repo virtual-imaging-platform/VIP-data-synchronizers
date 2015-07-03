@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Interface for synchronized devices.
  *
- * @author Tristan Glatard
+ * @author Tristan Glatard, Nouha Boujelben
  */
 public interface SyncedDevice {
 
@@ -43,12 +43,20 @@ public interface SyncedDevice {
     public void putFile(String localFile, String remoteDir) throws SyncException;
 
     /**
-     * Sets the 'authfailed' flag for the synchronization.
+     * Sets the 'Synchfailed' flag for the synchronization.
      *
      * @param s
      * @throws SyncException
      */
-    public void setAuthFailed(Synchronization s) throws SyncException;
+    public void setSynchronizationFailed(Synchronization s) throws SyncException;
+
+    /**
+     * Sets the 'SynchNotfailed' flag for the synchronization.
+     *
+     * @param s
+     * @throws SyncException
+     */
+    public void setSynchronizationNotFailed(Synchronization s) throws SyncException;
 
     /**
      * Sets the 'validated' flag for the synchronization.
@@ -99,7 +107,8 @@ public interface SyncedDevice {
     /**
      *
      * @param ua
-     * @return false if theEarliestNextSynchronization is before or equal to the current date
+     * @return false if theEarliestNextSynchronization is before or equal to the
+     * current date
      */
     public boolean mustWaitBeforeNextSynchronization(Synchronization ua);
 
@@ -108,19 +117,27 @@ public interface SyncedDevice {
      * @param ua
      * @return the number of failed Synchronization
      */
-    public int getNumberFailedSynchronization(Synchronization ua);
-    
-    
-    public void setNumberFailedSynchronization(Synchronization ua, int number);
+    public int getNumberSynchronizationFailed(Synchronization ua);
 
     /**
      *
-     * @param ua 
-     * @param duration the time will added to the current date to update the "theEarliestNextSynchronization"
+     * @param ua
+     * @param number set the number of failed Synchronization
+     */
+    public void updateNumberSynchronizationFailed(Synchronization ua, int number);
+
+    /**
+     *
+     * @param ua
+     * @param duration the time will added to the current date to update the
+     * "theEarliestNextSynchronization"
      */
     public void updateTheEarliestNextSynchronization(Synchronization ua, long duration);
-    
-    
-    public int getNumberOfMinuteFromConfigFile();
+
+    /**
+     *
+     * @return The slot time used for the exponential back-off algorithm
+     */
+    public double getSlotTimeFromConfigFile();
 
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * DAO interface.
- * @author Tristan Glatard
+ * @author Tristan Glatard, Nouha Boujelben
  */
 public interface SyncedDeviceDAO {
     
@@ -21,11 +21,19 @@ public interface SyncedDeviceDAO {
      public  void validateSynchronization(Synchronization s) throws SyncException;
      
      /**
-      * Sets the 'authfailed' flag for a synchronization.
+      * Sets the 'synchronizationfailed' flag for a synchronization.
       * @param s
       * @throws SyncException 
       */
-     public  void setAuthFailed(Synchronization s) throws SyncException;
+     public  void setSynchronizationFailed(Synchronization s) throws SyncException;
+     
+     
+     /**
+      * Sets the 'synchronisationfailed' flag for a synchronization.
+      * @param s
+      * @throws SyncException 
+      */
+     public  void setSynchronizationNotFailed(Synchronization s) throws SyncException;
      
      /**
       * Gets all the synchronizations.

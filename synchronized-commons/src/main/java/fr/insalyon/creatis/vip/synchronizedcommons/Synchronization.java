@@ -7,20 +7,20 @@ package fr.insalyon.creatis.vip.synchronizedcommons;
 /**
  * Bean that represents a synchronization.
  *
- * @author Tristan Glatard
+ * @author Tristan Glatard, Nouha Boujelben
  */
 public class Synchronization {
 
     private final String email;
     private boolean validated;
-    private final boolean authFailed;
+    private final boolean synchFailed;
     private final String syncedLFCDir;
 
-    public Synchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir) {
+    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir) {
         this.email = email;
         this.validated = validated;
         this.syncedLFCDir = syncedLFCDir;
-        this.authFailed = authFailed;
+        this.synchFailed = synchFailed;
     }
 
     public void setValidated(boolean validated) {
@@ -39,8 +39,8 @@ public class Synchronization {
         return syncedLFCDir;
     }
 
-    public boolean getAuthFailed() {
-        return authFailed;
+    public boolean getSynchronizationFailed() {
+        return synchFailed;
     }
 
     @Override
