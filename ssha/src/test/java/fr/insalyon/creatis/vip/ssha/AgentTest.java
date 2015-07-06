@@ -24,13 +24,13 @@ public class AgentTest {
      * Test of main method, of class Agent.
      */
     /**
-     * To test this class you have to run these following ssh commands: * SSH
-     * TUNNEL FOR THE MYSQL SERVER ssh -L [LOCAL PORT]:localhost:3306 [USER
-     * NAME]@vip.creatis.insa-lyon.fr -f -N * SSH TUNNEL FOR GRIDA ssh -L [LOCAL
-     * PORT]:localhost:[GRIDA PORT] [USER NAME]@vip.creatis.insa-lyon.fr -f -N
+     * To test this class you have to run these following ssh commands: 
+     * SSH TUNNEL FOR THE MYSQL SERVER ssh -L [LOCAL PORT]:localhost:3306 [USERNAME]@vip.creatis.insa-lyon.fr -f -N 
+     * SSH TUNNEL FOR GRIDA 
+     * ssh -L [LOCALPORT]:localhost:[GRIDA PORT] [USER NAME]@vip.creatis.insa-lyon.fr -f -N
      * USE SSHFS TO MOUNT YOUR LOCAL DIR (SPECIFIED IN THE CONFIGURATION FILE)
-     * WITH A KINGKONG REMOTE DIR TO BE ACCESSIBLE BY GRIDA sshfs [USER
-     * NAME]@vip.creatis.insa-lyon.fr:[REMOTE DIR] [LOCAL DIR] -o nonempty
+     * WITH A KINGKONG REMOTE DIR TO BE ACCESSIBLE BY GRIDA 
+     * sshfs [USERNAME]@vip.creatis.insa-lyon.fr:[REMOTE DIR] [LOCAL DIR] -o nonempty
      */
     @Test
     public void testMain() {
