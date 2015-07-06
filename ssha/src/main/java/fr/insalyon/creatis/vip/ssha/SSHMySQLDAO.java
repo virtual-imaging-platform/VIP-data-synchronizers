@@ -85,7 +85,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "VIPSSHAccounts SET "
-                    + "synch_failed = '0' "
+                    + "auth_failed = '0' "
                     + "WHERE email = ? and LFCDir=?");
 
             ps.setString(1, ua.getEmail());
@@ -103,7 +103,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "VIPSSHAccounts SET "
-                    + "synch_failed = '1' "
+                    + "auth_failed = '1' "
                     + "WHERE email = ? and LFCDir=?");
 
             ps.setString(1, ua.getEmail());
@@ -128,7 +128,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
             while (rs.next()) {
                 String val = rs.getString("validated");
-                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("synch_failed"), rs.getString("LFCDir"),
+                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),
                         rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"));
                 userAccounts.add(ua);
             }
@@ -147,7 +147,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             Statement stat = connection.createStatement();
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
-                    + " synch_failed BOOLEAN, theEarliestNextSynchronistation timestamp, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
 
             logger.info("Table VIPSSHAccounts successfully created.");
 
