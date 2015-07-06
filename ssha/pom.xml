@@ -4,7 +4,7 @@
 
     <groupId>fr.insalyon.creatis.vip</groupId>
     <artifactId>SSHA</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <packaging>jar</packaging>
 
     <name>SSHA</name>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>fr.insalyon.creatis.vip</groupId>
             <artifactId>SynchronizedCommons</artifactId>
-            <version>0.1</version>
+            <version>0.2</version>
             <type>jar</type>
         </dependency>
         <dependency>
