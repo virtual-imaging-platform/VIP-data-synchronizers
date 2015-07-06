@@ -90,8 +90,8 @@ public class SSHDeviceTest {
     public void testGetNumberOfMinuteFromConfigFile() {
         System.out.println("getNumberOfMinuteFromConfigFile");
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
-        Double expResult = 0.0512;
-        Double result = instance.getSlotTimeFromConfigFile();
+        Double expResult = 5.0;
+        Double result = instance.getNbSecondFromConfigFile();
         assertEquals(expResult, result);
 
     }

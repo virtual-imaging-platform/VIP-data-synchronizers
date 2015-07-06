@@ -277,9 +277,7 @@ public class Synchronizer extends Thread {
 
     private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
-        Random r = new Random();
-        int i1 = r.nextInt((int) Math.pow(2, sd.getNumberSynchronizationFailed(ua)));
-        sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + i1 * sd.getSlotTimeFromConfigFile()));
+        sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + Math.pow(2, sd.getNumberSynchronizationFailed(ua)) *1000* sd.getNbSecondFromConfigFile()));
 
     }
 }

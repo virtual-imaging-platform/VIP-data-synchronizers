@@ -299,8 +299,8 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public double getSlotTimeFromConfigFile() {
-       return ConfigFile.getInstance().getSlotTime();
+    public double getNbSecondFromConfigFile() {
+       return ConfigFile.getInstance().getNbSecond();
     }
 
     

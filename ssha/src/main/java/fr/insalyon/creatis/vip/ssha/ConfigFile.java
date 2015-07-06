@@ -29,7 +29,7 @@ public class ConfigFile {
     private String url;
     private String userName;
     private String password;
-    private double slotTime;
+    private double nbSecond;
 
     /**
      *
@@ -56,7 +56,7 @@ public class ConfigFile {
             url = config.getString("ssha.db.jdbcurl", "jdbc:mysql://localhost:3306/vip");
             userName = config.getString("ssha.db.user", "vip");
             password = config.getString("ssha.db.password", "changeit");
-            slotTime = config.getDouble("ssha.exponentielBackOff.slotTime", 0.0512);
+            nbSecond = config.getDouble("ssha.exponentielBackOff.nbSecond", 5);
 
             config.setProperty("ssha.grida.host", gridaHost);
             config.setProperty("ssha.grida.port", gridaPort);
@@ -69,7 +69,7 @@ public class ConfigFile {
             config.setProperty("ssha.db.jdbcurl", url);
             config.setProperty("ssha.db.user", userName);
             config.setProperty("ssha.db.password", password);
-            config.setProperty("ssha.exponentielBackOff.minute", slotTime);
+            config.setProperty("ssha.exponentielBackOff.nbSecond", nbSecond);
             config.save();
 
         } catch (ConfigurationException ex) {
@@ -258,16 +258,16 @@ public class ConfigFile {
      * @return the slotTime in millisecond unit
      */
 
-    public double getSlotTime() {
-        return slotTime;
+    public double getNbSecond() {
+        return nbSecond;
     }
      
     /**
      *
      * @param slotTime millisecond unit
      */
-    public void setSlotTime(double slotTime) {
-        this.slotTime = slotTime;
+    public void setNbSecond(double nbSecond) {
+        this.nbSecond = nbSecond;
     }
 
 }
