@@ -18,6 +18,17 @@ import org.junit.rules.ExpectedException;
  *
  * @author Nouha Boujelben
  */
+
+/* 
+
+To test this class you have to:
+**reconfigure the config file especially the :ssha.auth.privatekeyfile to point it to the specific file
+**paramters of the data base: ssha.db.jdbcurl, ssha.db.user, ssha.db.password
+
+**SSH TUNNEL FOR THE MYSQL SERVER
+    ssh -L [LOCAL PORT]:localhost:3306 [USERNAME]@vip.creatis.insa-lyon.fr -f -N 
+**
+*/
 public class SSHDeviceTest {
 
     static Synchronization ua;
@@ -28,7 +39,8 @@ public class SSHDeviceTest {
 
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        ua = new Synchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/nouha_ssh");
+         System.setProperty("logfile.name", "./ssha.log");
+        ua = new Synchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh");
     }
 
     /**
@@ -36,7 +48,7 @@ public class SSHDeviceTest {
      */
     @Test
     public void testUpdateNumberSynchronizationFailed() {
-        System.setProperty("logfile.name", "./ssha.log");
+       
         System.out.println("updateNumberSynchronizationFailed");
         int number = 4;
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
@@ -59,7 +71,6 @@ public class SSHDeviceTest {
         thrown.expect(SyncException.class);
         System.setProperty("logfile.name", "./ssha.log");
         final Logger logger = Logger.getLogger(SSHDeviceTest.class);
-
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
         instance.updateTheEarliestNextSynchronization(ua, 100000);
         logger.info(SSHMySQLDAO.getInstance(ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword()).getTheEarliestNextSynchronistation(ua));
@@ -72,9 +83,8 @@ public class SSHDeviceTest {
      */
     @Test
     public void testMustWaitBeforeNextSynchronization() {
-        System.out.println("mustWaitBeforeNextSynchronization");
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
-        boolean expResult = false;
+        boolean expResult =false;
         boolean result = instance.mustWaitBeforeNextSynchronization(ua);
         assertEquals(expResult, result);
 
@@ -88,7 +98,6 @@ public class SSHDeviceTest {
      */
     @Test
     public void testGetNumberOfMinuteFromConfigFile() {
-        System.out.println("getNumberOfMinuteFromConfigFile");
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
         Double expResult = 5.0;
         Double result = instance.getNbSecondFromConfigFile();

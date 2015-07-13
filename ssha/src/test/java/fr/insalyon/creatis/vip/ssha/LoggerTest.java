@@ -24,8 +24,8 @@ public class LoggerTest {
      */
     @Test
     public void testLogger() throws Exception {
-       System.setProperty("logfile.name", "./ssha.log");
-       File f1=new File("./ssha.log");
+       System.setProperty("logfile.name", "./kk.log");
+       File f1=new File("./kk.log");
        long l1=f1.length(); 
        final Logger logger = Logger.getLogger(LoggerTest.class);
        logger.info("write in the logger file");

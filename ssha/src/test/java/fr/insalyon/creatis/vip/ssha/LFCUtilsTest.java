@@ -13,6 +13,12 @@ import org.junit.Test;
 /**
  *
  * @author Nouha Boujelben
+ * To test this file you have to make a SSH TUNNEL FOR GRIDA 
+    * ssh -L [LOCALPORT]:localhost:[GRIDA PORT] [USER NAME]@vip.creatis.insa-lyon.fr -f -N
+    in this test: 
+    *the grida port is 9011 (you can change it ) 
+    *the grida host "kingkong.grid.creatis.insa-lyon.fr"
+    *the proxy point to a file in "/home/boujelben/.vip/proxies/biomed/x509up_server"
  */
 public class LFCUtilsTest {
 
