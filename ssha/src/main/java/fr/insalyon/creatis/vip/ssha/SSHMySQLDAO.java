@@ -128,7 +128,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
             while (rs.next()) {
                 String val = rs.getString("validated");
-                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),
+                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),rs.getString("transfertType"),
                         rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"));
                 userAccounts.add(ua);
             }
@@ -147,7 +147,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             Statement stat = connection.createStatement();
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
-                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, numberSynchronizationFailed INT, transfertType VARCHAR(255), PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
 
             logger.info("Table VIPSSHAccounts successfully created.");
 

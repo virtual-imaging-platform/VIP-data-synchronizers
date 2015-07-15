@@ -40,7 +40,7 @@ public class SSHDeviceTest {
     @BeforeClass
     public static void onceExecutedBeforeAll() {
          System.setProperty("logfile.name", "./ssha.log");
-        ua = new Synchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh");
+        ua = new Synchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh","synchronization");
     }
 
     /**

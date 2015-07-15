@@ -10,22 +10,26 @@ import org.junit.Test;
 
 /**
  *
- * @author nouha
+ * @author Nouha Boujelben this class will create a local data base for test you
+ * have to change some parameters
  */
 public class DataBaseTest {
 
     private static String jdbcDriver = "com.mysql.jdbc.Driver";
-    private static String dbName = "test";
-    private static String user="root";
-    private static String password="nouhanouha";
-    private static String jdbUrl="jdbc:mysql://localhost/"+dbName;
+    //the name of the data base
+    private static String dbName = "changeit";
+    //user
+    private static String user = "changeit";
+    //password of the MYSQL server
+    private static String password = "nouhanouha";
+    private static String jdbUrl = "jdbc:mysql://localhost/" + dbName;
 
     /**
      *
      */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-         System.setProperty("logfile.name", "./ssha.log");
+        System.setProperty("logfile.name", "./ssha.log");
     }
 
     /**
@@ -36,11 +40,11 @@ public class DataBaseTest {
     @Test
     public void createDataBase() throws SQLException, ClassNotFoundException {
         Class.forName(jdbcDriver);
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/?user="+user+"&password="+password);
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/?user=" + user + "&password=" + password);
         Statement s = conn.createStatement();
         int Result = s.executeUpdate("CREATE DATABASE IF NOT EXISTS " + dbName);
     }
-    
+
     /**
      *
      * @throws SQLException

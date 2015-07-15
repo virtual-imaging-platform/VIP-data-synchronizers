@@ -11,7 +11,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import org.apache.log4j.Logger;
 
 /**
@@ -142,7 +141,6 @@ public class Synchronizer extends Thread {
      * @throws SyncException
      */
     private void doSync(Synchronization s) throws SyncException {
-        logger.info("");
         sd.setSynchronization(s);
         String syncedLFCDir = s.getSyncedLFCDir();
         int countFiles = 0; //this will count how many files are synced for a user
@@ -151,7 +149,58 @@ public class Synchronizer extends Thread {
         if (lfcFiles == null || remoteFiles == null) {
             return;
         }
-        //SyncedDevice -> LFC
+        if (s.getTransfertType().equals("DeviceToLFC")) {
+            //SyncedDevice -> LFC
+            transfertFilesFromSynchDeviceToLFC(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir);
+        } else if (s.getTransfertType().equals("LFCToDevice")) {
+            //LFC->SyncedDevice
+            transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir);
+        } else if (s.getTransfertType().equals("synchronization")) {
+            //SyncedDevice -> LFC
+            transfertFilesFromSynchDeviceToLFC(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir);
+            //LFC->SyncedDevice
+            transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir);
+        }
+    }
+
+    /**
+     * Copies a file from the SyncedDevice to the LFC.
+     *
+     * @param syncedShortPath the short path of the file in the SyncedDevice
+     * @param s the synchronization
+     * @param revision the revision of the file in the SyncedDevice
+     * @throws SyncException
+     */
+    private void copyToLFC(String syncedShortPath, Synchronization s, String revision) throws SyncException {
+
+        createLocalDir(PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
+        sd.getFile(syncedShortPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
+        lfcu.copyToLfc(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s), PathUtils.getDirFromPath(PathUtils.getLFCLongFromSyncShort(syncedShortPath, s)));
+        lfcu.setRevision(PathUtils.getLFCLongFromSyncShort(syncedShortPath, s), revision);
+    }
+
+    /**
+     * Returns true if the file path has to be ignored.
+     *
+     * @param path file path to test
+     * @return
+     */
+    boolean ignorePath(String path) {
+        File f = new File(path);
+        if (f.getName().startsWith(".")) {
+            return true;
+        }
+        return false;
+    }
+
+    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+        sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + Math.pow(2, sd.getNumberSynchronizationFailed(ua)) * 1000 * sd.getNbSecondFromConfigFile()));
+
+    }
+
+    private void transfertFilesFromSynchDeviceToLFC(Synchronization s, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir) throws SyncException {
+
         for (Map.Entry<String, String> p : remoteFiles.entrySet()) {
             if (countFiles < fileLimit) {
                 String syncedShortPath = PathUtils.cleanse(p.getKey()), remoteRevision = p.getValue();
@@ -191,8 +240,10 @@ public class Synchronizer extends Thread {
                 logger.info(String.format("Reached %s files for user %s at this iteration: skipping", countFiles, s.getEmail()));
             }
         }
+    }
 
-        //LFC->SyncedDevice
+    private void transfertFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir) throws SyncException {
+
         for (Map.Entry<String, String> q : lfcFiles.entrySet()) {
 
             if (countFiles < fileLimit && !ignorePath(q.getKey())) {
@@ -242,42 +293,6 @@ public class Synchronizer extends Thread {
                 }
             }
         }
-
     }
 
-    /**
-     * Copies a file from the SyncedDevice to the LFC.
-     *
-     * @param syncedShortPath the short path of the file in the SyncedDevice
-     * @param s the synchronization
-     * @param revision the revision of the file in the SyncedDevice
-     * @throws SyncException
-     */
-    private void copyToLFC(String syncedShortPath, Synchronization s, String revision) throws SyncException {
-
-        createLocalDir(PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
-        sd.getFile(syncedShortPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
-        lfcu.copyToLfc(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s), PathUtils.getDirFromPath(PathUtils.getLFCLongFromSyncShort(syncedShortPath, s)));
-        lfcu.setRevision(PathUtils.getLFCLongFromSyncShort(syncedShortPath, s), revision);
-    }
-
-    /**
-     * Returns true if the file path has to be ignored.
-     *
-     * @param path file path to test
-     * @return
-     */
-    boolean ignorePath(String path) {
-        File f = new File(path);
-        if (f.getName().startsWith(".")) {
-            return true;
-        }
-        return false;
-    }
-
-    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
-        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
-        sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + Math.pow(2, sd.getNumberSynchronizationFailed(ua)) *1000* sd.getNbSecondFromConfigFile()));
-
-    }
 }

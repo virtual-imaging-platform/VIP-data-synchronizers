@@ -9,7 +9,7 @@ import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
 /**
  * Bean object representing an SSH synchronization.
  *
- * @author Tristan Glatard
+ * @author Tristan Glatard, Nouha Boujelben
  */
 public class SSHSynchronization extends Synchronization {
 
@@ -17,6 +17,7 @@ public class SSHSynchronization extends Synchronization {
     private final String sshHostName;
     private final String sshDirectoryName;
     private final int port;
+   
 
     /**
      *
@@ -29,8 +30,8 @@ public class SSHSynchronization extends Synchronization {
      * @param directoryName
      * @param port
      */
-    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir, String userName, String hostName, String directoryName, int port) {
-        super(email, validated, authFailed, syncedLFCDir);
+    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir,String transfertType, String userName, String hostName, String directoryName, int port) {
+        super(email, validated, authFailed, syncedLFCDir,transfertType);
         this.sshUserName = userName;
         this.sshHostName = hostName;
         this.sshDirectoryName = directoryName;

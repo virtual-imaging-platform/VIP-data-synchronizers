@@ -24,8 +24,12 @@ public class AgentTest {
      * Test of main method, of class Agent.
      */
     /**
-     * To test this class you have to run these following ssh commands: 
-     * SSH TUNNEL FOR THE MYSQL SERVER ssh -L [LOCAL PORT]:localhost:3306 [USERNAME]@vip.creatis.insa-lyon.fr -f -N 
+     * To test this class you have to:
+     * Install an SSH server to test the synchronization 
+     * create a data base for test , you can run the class DataBaseTest and DataBaseOperations to create a local data base
+     * if you have a remote data base for test you can use this ssh commands
+     * SSH TUNNEL FOR THE MYSQL SERVER 
+     * ssh -L [LOCAL PORT]:localhost:[REMOTE PORT] [USERNAME]@[SSH_SERVER] -f -N 
      * SSH TUNNEL FOR GRIDA(grida port and grida host are configured in the config file)
      * ssh -L [LOCALPORT]:localhost:[GRIDA PORT] [USER NAME]@vip.creatis.insa-lyon.fr -f -N
      * USE SSHFS TO MOUNT YOUR LOCAL DIR (SPECIFIED IN THE CONFIGURATION FILE)

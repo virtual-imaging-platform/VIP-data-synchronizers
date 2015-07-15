@@ -15,12 +15,15 @@ public class Synchronization {
     private boolean validated;
     private final boolean synchFailed;
     private final String syncedLFCDir;
+    private final String transfertType;
 
-    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir) {
+    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, String transfertType) {
         this.email = email;
         this.validated = validated;
         this.syncedLFCDir = syncedLFCDir;
         this.synchFailed = synchFailed;
+        this.transfertType = transfertType;
+
     }
 
     public void setValidated(boolean validated) {
@@ -41,6 +44,10 @@ public class Synchronization {
 
     public boolean getSynchronizationFailed() {
         return synchFailed;
+    }
+
+    public String getTransfertType() {
+        return transfertType;
     }
 
     @Override
