@@ -31,7 +31,7 @@ public class DataBaseOperations {
     boolean validated = true;
     boolean authFailed = false;
     String syncedLFCDir = "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh";
-    String transfertType = "synchronization";
+    //String transfertType = "Synchronization";
     private static String dbName = "test";
     private static String user = "root";
     private static String password = "nouhanouha";
@@ -49,13 +49,13 @@ public class DataBaseOperations {
         try {
             PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO VIPSSHAccounts(email, validated, auth_failed, LFCDir,transfertType, sshUser, sshHost, sshDir, sshPort) "
-                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, ?)");
+                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?)");
 
             ps.setString(1, email);
             ps.setBoolean(2, validated);
             ps.setBoolean(3, authFailed);
             ps.setString(4, syncedLFCDir);
-            ps.setString(5, transfertType);
+            //ps.setString(5, transfertType);
             ps.setString(6, userName);
             ps.setString(7, hostName);
             ps.setString(8, directoryName);
