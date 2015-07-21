@@ -24,17 +24,18 @@ public class AgentTest {
      * Test of main method, of class Agent.
      */
     /**
-     * To test this class you have to:
-     * Install an SSH server to test the synchronization 
-     * create a data base for test , you can run the class DataBaseTest and DataBaseOperations to create a local data base
-     * if you have a remote data base for test you can use this ssh commands
-     * SSH TUNNEL FOR THE MYSQL SERVER 
-     * ssh -L [LOCAL PORT]:localhost:[REMOTE PORT] [USERNAME]@[SSH_SERVER] -f -N 
-     * SSH TUNNEL FOR GRIDA(grida port and grida host are configured in the config file)
-     * ssh -L [LOCALPORT]:localhost:[GRIDA PORT] [USER NAME]@vip.creatis.insa-lyon.fr -f -N
-     * USE SSHFS TO MOUNT YOUR LOCAL DIR (SPECIFIED IN THE CONFIGURATION FILE)
-     * WITH A KINGKONG REMOTE DIR TO BE ACCESSIBLE BY GRIDA 
-     * sshfs [USERNAME]@vip.creatis.insa-lyon.fr:[REMOTE DIR] [LOCAL DIR] -o nonempty
+     * To test the synchronization in your machine you have to:
+     * 1)Active the sshd server (sudo service sshd start)
+     * 2)Create a database for test:
+     *       **local database :you can run the class DataBaseTest and DataBaseOperations to create a local database
+     *       **remote database(remote MYSQL server) for test you have to create an ssh tunnel for the mysql server:
+     *         ssh -L [LOCAL PORT]:localhost:[REMOTE PORT] [USERNAME]@[SSH_SERVER] -f -N
+     *         (option -f -N  to force ssh to go to background without running a particular command on the remote server)
+     * 3)SSH TUNNEL FOR GRIDA(grida port and grida host are configured in the ssha config file)
+     *        ssh -L [LOCALPORT]:localhost:[GRIDA PORT] [USER NAME]@[GRIDA SERVER] -f -N
+     *        use SSHFS to mount a  temporary local directory (specified in the ssha config file) with a directory in grida server 
+     *        these two directories have to take the some path and name
+     *        sshfs [USERNAME]@[SSH REMOTE SERVER]:[REMOTE DIR] [LOCAL DIR] -o nonempty
      */
     @Test
     public void testMain() {
