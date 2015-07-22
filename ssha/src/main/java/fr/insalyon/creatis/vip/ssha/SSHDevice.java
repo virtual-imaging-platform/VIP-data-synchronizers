@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 public class SSHDevice implements SyncedDevice {
 
     private Session session;
-   
+
     //ssh config
     private SSHSynchronization account;
     private String remoteDir;
@@ -128,16 +128,31 @@ public class SSHDevice implements SyncedDevice {
         }
     }
 
+    /**
+     *
+     * @param remoteFile
+     * @throws SyncException
+     */
+    @Override
+    public void deleteFile(String remoteFile) throws SyncException {
+        connect();
+        try {
+            deleteFileConnected(remoteFile);
+        } finally {
+            disconnect();
+        }
+    }
+
     @Override
     public void setSynchronizationFailed(Synchronization ua) throws SyncException {
         SSHMySQLDAO.getInstance(jdbcUrl, username, password).setSynchronizationFailed(ua);
     }
-    
+
     @Override
     public void setSynchronizationNotFailed(Synchronization ua) throws SyncException {
-         SSHMySQLDAO.getInstance(jdbcUrl, username, password).setSynchronizationNotFailed(ua);
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).setSynchronizationNotFailed(ua);
     }
-    
+
     @Override
     public void validateSynchronization(Synchronization ua) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -177,6 +192,20 @@ public class SSHDevice implements SyncedDevice {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
             sftpChannel.get(remoteDir + "/" + remoteFile, localDir);
+            sftpChannel.exit();
+        } catch (JSchException ex) {
+            throw new SyncException(ex);
+        } catch (SftpException ex) {
+            throw new SyncException(ex);
+        }
+    }
+
+    private void deleteFileConnected(String remoteFile) throws SyncException {
+        try {
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            sftpChannel.rm(remoteDir + "/" + remoteFile);
             sftpChannel.exit();
         } catch (JSchException ex) {
             throw new SyncException(ex);
@@ -291,7 +320,7 @@ public class SSHDevice implements SyncedDevice {
 
     @Override
     public void updateNumberSynchronizationFailed(Synchronization ua, int number) {
-       try {
+        try {
             SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateNumberSynchronizationFailed(ua, number);
         } catch (SyncException ex) {
             java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
@@ -300,9 +329,7 @@ public class SSHDevice implements SyncedDevice {
 
     @Override
     public double getNbSecondFromConfigFile() {
-       return ConfigFile.getInstance().getNbSecond();
+        return ConfigFile.getInstance().getNbSecond();
     }
 
-    
-    
 }

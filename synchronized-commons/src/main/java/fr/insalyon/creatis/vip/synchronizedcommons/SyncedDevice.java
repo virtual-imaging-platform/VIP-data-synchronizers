@@ -34,6 +34,14 @@ public interface SyncedDevice {
     public void getFile(String remoteFile, String localDir) throws SyncException;
 
     /**
+     * delete a remote file.
+     *
+     * @param remoteFile short path of the remote file
+     * @throws SyncException
+     */
+    public void deleteFile(String remoteFile) throws SyncException;
+
+    /**
      * Copies a local file to a remote directory.
      *
      * @param localFile absolute path of the local file.
@@ -136,7 +144,7 @@ public interface SyncedDevice {
 
     /**
      *
-     * @return The slot time used for the exponential back-off algorithm 
+     * @return The slot time used for the exponential back-off algorithm
      */
     public double getNbSecondFromConfigFile();
 

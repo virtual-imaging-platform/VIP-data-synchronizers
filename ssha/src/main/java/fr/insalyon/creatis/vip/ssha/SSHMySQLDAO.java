@@ -6,6 +6,7 @@ package fr.insalyon.creatis.vip.ssha;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDeviceDAO;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -128,7 +129,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
             while (rs.next()) {
                 String val = rs.getString("validated");
-                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),rs.getString("transfertType"),
+                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),TransfertType.valueOf(rs.getString("transfertType")),
                         rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"));
                 userAccounts.add(ua);
             }

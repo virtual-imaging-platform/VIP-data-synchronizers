@@ -15,9 +15,9 @@ public class Synchronization {
     private boolean validated;
     private final boolean synchFailed;
     private final String syncedLFCDir;
-    private final String transfertType;
+    private final TransfertType transfertType;
 
-    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, String transfertType) {
+    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, TransfertType transfertType) {
         this.email = email;
         this.validated = validated;
         this.syncedLFCDir = syncedLFCDir;
@@ -46,7 +46,7 @@ public class Synchronization {
         return synchFailed;
     }
 
-    public String getTransfertType() {
+    public TransfertType getTransfertType() {
         return transfertType;
     }
 

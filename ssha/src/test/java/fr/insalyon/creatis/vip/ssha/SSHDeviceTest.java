@@ -6,6 +6,7 @@
 package fr.insalyon.creatis.vip.ssha;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -40,9 +41,9 @@ public class SSHDeviceTest {
     @BeforeClass
     public static void onceExecutedBeforeAll() {
          System.setProperty("logfile.name", "./ssha.log");
-        ua = new Synchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh","synchronization");
+        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransfertType.Synchronization,"nouha","localhost","/home/nouha/r",22);
     }
-
+       
     /**
      * Test of getNumberSynchronizationFailed method, of class SSHDevice.
      */
@@ -56,7 +57,7 @@ public class SSHDeviceTest {
         assertEquals(number, instance.getNumberSynchronizationFailed(ua));
     }
 
-    /**
+     /**
      * Test of updateTheEarliestNextSynchronization method, of class SSHDevice.
      *
      * * @throws
@@ -92,10 +93,9 @@ public class SSHDeviceTest {
 
     /**
      * Test of updateNumberSynchronizationFailed method, of class SSHDevice.
-     */
-    /**
-     * Test of getSlotTimeFromConfigFile method, of class SSHDevice.
-     */
+    */
+ 
+     
     @Test
     public void testGetNumberOfMinuteFromConfigFile() {
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
@@ -110,10 +110,21 @@ public class SSHDeviceTest {
 
     @Test
     public void testGetSynchronizations() throws SyncException {
-        thrown.expect(SyncException.class);
+        thrown2.expect(SyncException.class);
         SSHMySQLDAO sSHMySQLDAO = SSHMySQLDAO.getInstance(ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
         assertEquals(2, sSHMySQLDAO.getSynchronizations().size());
         throw new SyncException("get synchronizations failed");
+    }
+    @Rule
+    public final ExpectedException thrown3 = ExpectedException.none();
+    @Test
+     public void deleteFile() throws SyncException {
+         thrown2.expect(SyncException.class);
+         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
+         instance.setSynchronization(ua);
+         instance.deleteFile("rr.txt");
+          throw new SyncException("failed to delete file");
+
     }
 
 }
