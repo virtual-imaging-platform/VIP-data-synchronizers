@@ -289,9 +289,9 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public boolean mustWaitBeforeNextSynchronization(Synchronization ua) {
+    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) {
         try {
-            return SSHMySQLDAO.getInstance(jdbcUrl, username, password).mustWaitBeforeNextSynchronization(ua);
+            return SSHMySQLDAO.getInstance(jdbcUrl, username, password).isMustWaitBeforeNextSynchronization(ua);
         } catch (SyncException ex) {
             java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
         }

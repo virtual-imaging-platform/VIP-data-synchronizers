@@ -103,13 +103,13 @@ public class Synchronizer extends Thread {
                             //if synchronization failed 
                         } else if (s.getSynchronizationFailed()) {
                             //check the date of the earliest next synchronization and if it is after the current date this method return true
-                            if (!sd.mustWaitBeforeNextSynchronization(s)) {
+                            if (!sd.isMustWaitBeforeNextSynchronization(s)) {
                                 //update the earlisNextSynchronisation with the ExponentialBackoff algorithm
                                 updateExponentialBackoff(sd, s);
                                 doSync(s);
-                                //if the synchronization passed, set the number of failed Synchronization to zero
+                                //if the synchronization passed, set the number of failed synchronization to zero
                                 sd.updateNumberSynchronizationFailed(s, 0);
-                                //if the synchronization passed, set the synchronisation not failed
+                                //if the synchronization passed, set the synchronisation to not failed
                                 sd.setSynchronizationNotFailed(s);
                             }
                         }
@@ -154,17 +154,17 @@ public class Synchronizer extends Thread {
         switch (transfertType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
-                transfertFilesFromSynchDeviceToLFC(s,sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir,false);
+                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
                 break;
             case LFCToDevice:
                 //LFC->SyncedDevice
-                transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir,true);
+                transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
                 //SyncedDevice -> LFC
-                transfertFilesFromSynchDeviceToLFC(s,sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir,false);
+                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 //LFC->SyncedDevice
-                transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir,false);
+                transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
         }
     }
@@ -178,7 +178,6 @@ public class Synchronizer extends Thread {
      * @throws SyncException
      */
     private void copyToLFC(String syncedShortPath, Synchronization s, String revision) throws SyncException {
-
         createLocalDir(PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
         sd.getFile(syncedShortPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s)));
         lfcu.copyToLfc(PathUtils.getLocalPathFromSyncShort(syncedShortPath, sd, s), PathUtils.getDirFromPath(PathUtils.getLFCLongFromSyncShort(syncedShortPath, s)));
@@ -205,7 +204,7 @@ public class Synchronizer extends Thread {
 
     }
 
-    private void transfertFilesFromSynchDeviceToLFC(Synchronization s,SyncedDevice sd, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteSourceFiles) throws SyncException {
+    private void transfertFilesFromSynchDeviceToLFC(Synchronization s, SyncedDevice sd, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
 
         for (Map.Entry<String, String> p : remoteFiles.entrySet()) {
             if (countFiles < fileLimit) {
@@ -214,12 +213,11 @@ public class Synchronizer extends Thread {
 
                 if (lfcRev == null) {
                     //file is in SyncedDevice but not in LFC: copy to lfc
-
                     logger.info("==> (new file)" + String.format("%s - %s - %s -%s / %s", s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
                     if (!ignorePath(syncedShortPath)) {
                         copyToLFC(syncedShortPath, s, remoteRevision);
-                        if(deleteSourceFiles){
-                        sd.deleteFile(syncedShortPath);
+                        if (deleteFilesFromSource) {
+                            sd.deleteFile(syncedShortPath);
                         }
                         countFiles++;
                     } else {
@@ -233,7 +231,7 @@ public class Synchronizer extends Thread {
                         lfcu.deleteFromLFC("/" + syncedShortPath, s);
                         if (!ignorePath(syncedShortPath)) {
                             copyToLFC(syncedShortPath, s, remoteRevision);
-                            if (deleteSourceFiles) {
+                            if (deleteFilesFromSource) {
                                 sd.deleteFile(syncedShortPath);
                             }
                             lfcFiles.remove(syncedShortPath);
@@ -254,7 +252,7 @@ public class Synchronizer extends Thread {
         }
     }
 
-    private void transfertFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteSourceFiles) throws SyncException {
+    private void transfertFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
 
         for (Map.Entry<String, String> q : lfcFiles.entrySet()) {
 
@@ -272,9 +270,9 @@ public class Synchronizer extends Thread {
                         lfcu.getLFCFile(lfcPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd)), s);//  lfcPath, sd),ua);
                         sd.putFile(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd), PathUtils.getSyncShortFromLFCShort(lfcPath));//"/"+PathUtils.removeSyncedDir(PathUtils.getL(lfcPath, sd),ua));
                         lfcu.setRevision(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd.getRevision(PathUtils.getSyncShortFromLFCShort(lfcPath)));
-                        if(deleteSourceFiles){
-                        lfcu.deleteFromLFC(lfcPath, s);
-                        logger.info(lfcPath+" was removed from LFC");
+                        if (deleteFilesFromSource) {
+                            lfcu.deleteFromLFC(lfcPath, s);
+                            logger.info(lfcPath + " was removed from LFC");
                         }
                         countFiles++;
                     } else {

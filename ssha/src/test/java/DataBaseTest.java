@@ -16,7 +16,7 @@ import org.junit.Test;
 public class DataBaseTest {
 
     private static String jdbcDriver = "com.mysql.jdbc.Driver";
-    //the name of the data base
+    //the name of the database
     private static String dbName = "changeit";
     //user
     private static String user = "changeit";
@@ -24,9 +24,7 @@ public class DataBaseTest {
     private static String password = "nouhanouha";
     private static String jdbUrl = "jdbc:mysql://localhost/" + dbName;
 
-    /**
-     *
-     */
+    
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         System.setProperty("logfile.name", "./ssha.log");
@@ -42,7 +40,7 @@ public class DataBaseTest {
         Class.forName(jdbcDriver);
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/?user=" + user + "&password=" + password);
         Statement s = conn.createStatement();
-        int Result = s.executeUpdate("CREATE DATABASE IF NOT EXISTS " + dbName);
+        s.executeUpdate("CREATE DATABASE IF NOT EXISTS " + dbName);
     }
 
     /**

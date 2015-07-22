@@ -21,16 +21,17 @@ public class DataBaseOperations {
 
     private static Connection connection;
     //the ssh user name
-    String userName = "";
+    private String userName = "";
     //the ssh server host
-    String hostName = "";
+    private String hostName = "";
     //the ssh directory
-    String directoryName = "";
+    private String directoryName = "";
     int sshPort = 22;
-    String email = "nouha.boujelben@creatis.insa-lyon.fr";
+    private String email = "nouha.boujelben@creatis.insa-lyon.fr";
     boolean validated = true;
     boolean authFailed = false;
     String syncedLFCDir = "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh";
+    private boolean deleteFilesFromSource=false;
     TransfertType transfertType = TransfertType.Synchronization;
     private static String dbName = "test";
     private static String user = "root";
@@ -49,7 +50,7 @@ public class DataBaseOperations {
         try {
             PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO VIPSSHAccounts(email, validated, auth_failed, LFCDir,transfertType, sshUser, sshHost, sshDir, sshPort) "
-                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, ?)");
+                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, ?,?)");
 
             ps.setString(1, email);
             ps.setBoolean(2, validated);
@@ -60,6 +61,7 @@ public class DataBaseOperations {
             ps.setString(7, hostName);
             ps.setString(8, directoryName);
             ps.setInt(9, sshPort);
+            ps.setBoolean(3, deleteFilesFromSource);
             ps.execute();
             ps.close();
 
