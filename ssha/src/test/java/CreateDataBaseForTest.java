@@ -11,15 +11,17 @@ import org.junit.Test;
 /**
  *
  * @author Nouha Boujelben this class will create a local data base for test you
- * have to change some parameters
+ * you have to start the service mysqld if it is not the case (service mysqld start)
+ * have to change some parameters(user, password)
+ * this class will create the a local data base for test
  */
-public class DataBaseTest {
+public class CreateDataBaseForTest {
 
     private static String jdbcDriver = "com.mysql.jdbc.Driver";
     //the name of the database
-    private static String dbName = "changeit";
+    private static String dbName = "test";
     //user
-    private static String user = "changeit";
+    private static String user = "root";
     //password of the MYSQL server
     private static String password = "nouhanouha";
     private static String jdbUrl = "jdbc:mysql://localhost/" + dbName;

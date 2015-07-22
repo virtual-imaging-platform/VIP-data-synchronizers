@@ -143,7 +143,7 @@
             Statement stat = connection.createStatement();
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
-                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, numberSynchronizationFailed INT, transfertType VARCHAR(255), deleteFilesFromSource BOOLEAN, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp DEFAULT CURRENT_TIMESTAMP, numberSynchronizationFailed INT, transfertType VARCHAR(255), deleteFilesFromSource BOOLEAN, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {

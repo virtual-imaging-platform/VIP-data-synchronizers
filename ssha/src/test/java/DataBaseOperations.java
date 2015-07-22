@@ -9,9 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ *This class will insert a record into you table VIPSSHAccounts
  */
 /**
  *
@@ -21,17 +19,17 @@ public class DataBaseOperations {
 
     private static Connection connection;
     //the ssh user name
-    private String userName = "";
+    String userName = "nouha";
     //the ssh server host
-    private String hostName = "";
+    String hostName = "localhost";
     //the ssh directory
-    private String directoryName = "";
+    String directoryName = "/home/nouha/r";
     int sshPort = 22;
-    private String email = "nouha.boujelben@creatis.insa-lyon.fr";
+    String email = "nouha.boujelben@creatis.insa-lyon.fr";
     boolean validated = true;
     boolean authFailed = false;
     String syncedLFCDir = "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh";
-    private boolean deleteFilesFromSource=false;
+    boolean deleteFilesFromSource=false;
     TransfertType transfertType = TransfertType.Synchronization;
     private static String dbName = "test";
     private static String user = "root";
@@ -49,8 +47,8 @@ public class DataBaseOperations {
     public void addRecord() {
         try {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO VIPSSHAccounts(email, validated, auth_failed, LFCDir,transfertType, sshUser, sshHost, sshDir, sshPort) "
-                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, ?,?)");
+                    "INSERT INTO VIPSSHAccounts(email, validated, auth_failed, LFCDir,transfertType, sshUser, sshHost, sshDir, sshPort, deleteFilesFromSource) "
+                    + "VALUES (?, ?, ?, ?,?, ?, ?, ?, ?, ?)");
 
             ps.setString(1, email);
             ps.setBoolean(2, validated);
@@ -61,7 +59,7 @@ public class DataBaseOperations {
             ps.setString(7, hostName);
             ps.setString(8, directoryName);
             ps.setInt(9, sshPort);
-            ps.setBoolean(3, deleteFilesFromSource);
+            ps.setBoolean(10, deleteFilesFromSource);
             ps.execute();
             ps.close();
 
