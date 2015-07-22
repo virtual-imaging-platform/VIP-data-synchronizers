@@ -32,8 +32,8 @@ public class SSHSynchronization extends Synchronization {
      * @param directoryName
      * @param port
      */
-    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir,TransfertType transfertType, String userName, String hostName, String directoryName, int port) {
-        super(email, validated, authFailed, syncedLFCDir,transfertType);
+    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir,TransfertType transfertType, String userName, String hostName, String directoryName, int port,boolean deleteFilesFromSource) {
+        super(email, validated, authFailed, syncedLFCDir,transfertType,deleteFilesFromSource);
         this.sshUserName = userName;
         this.sshHostName = hostName;
         this.sshDirectoryName = directoryName;

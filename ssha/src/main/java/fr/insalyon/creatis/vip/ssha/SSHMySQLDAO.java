@@ -1,32 +1,32 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package fr.insalyon.creatis.vip.ssha;
+    /*
+    * To change this template, choose Tools | Templates
+    * and open the template in the editor.
+    */
+    package fr.insalyon.creatis.vip.ssha;
 
-import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDeviceDAO;
-import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
-import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import org.apache.log4j.Logger;
+    import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDeviceDAO;
+    import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
+    import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+    import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
+    import java.sql.Connection;
+    import java.sql.DriverManager;
+    import java.sql.PreparedStatement;
+    import java.sql.ResultSet;
+    import java.sql.SQLException;
+    import java.sql.Statement;
+    import java.sql.Timestamp;
+    import java.util.ArrayList;
+    import java.util.Calendar;
+    import java.util.List;
+    import org.apache.log4j.Logger;
 
-/**
- * DAO for SSH synchronizations.
- *
- * @author Tristan Glatard
- * @author Nouha Boujelben
- */
-public class SSHMySQLDAO implements SyncedDeviceDAO {
+    /**
+    * DAO for SSH synchronizations.
+    *
+    * @author Tristan Glatard
+    * @author Nouha Boujelben
+    */
+    public class SSHMySQLDAO implements SyncedDeviceDAO {
 
     private static SSHMySQLDAO instance = null;
     private Connection connection;
@@ -88,12 +88,10 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
                     + "VIPSSHAccounts SET "
                     + "auth_failed = '0' "
                     + "WHERE email = ? and LFCDir=?");
-
             ps.setString(1, ua.getEmail());
             ps.setString(2, ua.getSyncedLFCDir());
             ps.executeUpdate();
             ps.close();
-
         } catch (SQLException ex) {
             throw new SyncException(ex);
         }
@@ -111,7 +109,6 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.setString(2, ua.getSyncedLFCDir());
             ps.executeUpdate();
             ps.close();
-
         } catch (SQLException ex) {
             throw new SyncException(ex);
         }
@@ -119,27 +116,25 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
     @Override
     public List<Synchronization> getSynchronizations() throws SyncException {
+
         ArrayList<Synchronization> userAccounts = new ArrayList<Synchronization>();
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT "
                     + " * "
                     + "FROM VIPSSHAccounts");
-
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 String val = rs.getString("validated");
-                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"),TransfertType.valueOf(rs.getString("transfertType")),
-                        rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"));
+                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"), TransfertType.valueOf(rs.getString("transfertType")),
+                        rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"), rs.getBoolean("deleteFilesFromSource"));
                 userAccounts.add(ua);
             }
-
             ps.close();
             return userAccounts;
-
         } catch (SQLException ex) {
             throw new SyncException(ex);
         }
+
     }
 
     private void createTable() throws SyncException {
@@ -148,8 +143,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             Statement stat = connection.createStatement();
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
-                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, numberSynchronizationFailed INT, transfertType VARCHAR(255), PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
-
+                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp, numberSynchronizationFailed INT, transfertType VARCHAR(255), deleteFilesFromSource BOOLEAN, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {
@@ -192,6 +186,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
      * @param ua
      * @throws SyncException
      */
+    @Override
     public void updateTheEarliestNextSynchronistation(Synchronization ua, long duration) throws SyncException {
 
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime());
@@ -203,7 +198,6 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
                     + "VIPSSHAccounts SET "
                     + "theEarliestNextSynchronistation = ?"
                     + "WHERE email = ? and LFCDir=?");
-
             newTime.setTime(duration);
             ps.setTimestamp(1, newTime);
             ps.setString(2, ua.getEmail());
@@ -223,6 +217,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
      * @return
      * @throws SyncException
      */
+    @Override
     public Timestamp getTheEarliestNextSynchronistation(Synchronization ua) throws SyncException {
 
         try {
@@ -253,7 +248,8 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
      * @return
      * @throws SyncException
      */
-    public boolean mustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException {
+    @Override
+    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException {
 
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 
@@ -264,7 +260,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         }
 
     }
-
+    @Override
     public int getNumberSynchronizationFailed(Synchronization ua) throws SyncException {
 
         try {
@@ -284,8 +280,8 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             throw new SyncException(ex);
         }
     }
-
-    public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
+        @Override
+        public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
 
         try {
 
@@ -293,7 +289,6 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
                     + "VIPSSHAccounts SET "
                     + "numberSynchronizationFailed=? "
                     + "WHERE email = ? and LFCDir=?");
-
             ps.setInt(1, number);
             ps.setString(2, ua.getEmail());
             ps.setString(3, ua.getSyncedLFCDir());
@@ -304,4 +299,4 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             throw new SyncException(ex);
         }
     }
-}
+    }

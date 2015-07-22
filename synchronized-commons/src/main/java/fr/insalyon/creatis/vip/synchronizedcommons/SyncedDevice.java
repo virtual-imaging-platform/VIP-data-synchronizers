@@ -118,7 +118,7 @@ public interface SyncedDevice {
      * @return false if theEarliestNextSynchronization is before or equal to the
      * current date
      */
-    public boolean mustWaitBeforeNextSynchronization(Synchronization ua);
+    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua);
 
     /**
      *
@@ -130,9 +130,9 @@ public interface SyncedDevice {
     /**
      *
      * @param ua
-     * @param number set the number of failed Synchronization
+     * @param numberSynchFailed set the number of failed Synchronization
      */
-    public void updateNumberSynchronizationFailed(Synchronization ua, int number);
+    public void updateNumberSynchronizationFailed(Synchronization ua, int numberSynchFailed);
 
     /**
      *
