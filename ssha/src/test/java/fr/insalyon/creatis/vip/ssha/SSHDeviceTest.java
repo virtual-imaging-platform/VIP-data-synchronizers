@@ -41,7 +41,7 @@ public class SSHDeviceTest {
     @BeforeClass
     public static void onceExecutedBeforeAll() {
          System.setProperty("logfile.name", "./ssha.log");
-        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransfertType.Synchronization,"nouha","localhost","/home/nouha/r",22);
+         ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransfertType.Synchronization,"nouha","localhost","/home/nouha/r",22,true);
     }
        
     /**
@@ -86,7 +86,7 @@ public class SSHDeviceTest {
     public void testMustWaitBeforeNextSynchronization() {
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
         boolean expResult =false;
-        boolean result = instance.mustWaitBeforeNextSynchronization(ua);
+        boolean result = instance.isMustWaitBeforeNextSynchronization(ua);
         assertEquals(expResult, result);
 
     }
@@ -123,7 +123,7 @@ public class SSHDeviceTest {
          SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
          instance.setSynchronization(ua);
          instance.deleteFile("rr.txt");
-          throw new SyncException("failed to delete file");
+         throw new SyncException("failed to delete file");
 
     }
 
