@@ -154,10 +154,10 @@ public class Synchronizer extends Thread {
         switch (transfertType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
-                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
+                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource() );
                 break;
             case LFCToDevice:
-                //LFC->SyncedDevice
+                //LFC->SyncedDevice 
                 transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
