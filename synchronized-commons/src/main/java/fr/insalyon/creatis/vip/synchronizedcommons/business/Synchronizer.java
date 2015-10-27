@@ -91,7 +91,6 @@ public class Synchronizer extends Thread {
                 synchronizations = sd.getSynchronization();
             } catch (SyncException ex) {
                 logger.error("Cannot get user accounts: " + ex.getMessage());
-                ex.printStackTrace();
             }
 
             for (Synchronization s : synchronizations) {
@@ -119,11 +118,9 @@ public class Synchronizer extends Thread {
                     try {
                         sd.setSynchronizationFailed(s);
                     } catch (SyncException ex1) {
-                        logger.error("Cannot mark failed Synchronization for user " + s.toString());
-                        ex.printStackTrace();
+                        logger.error("Cannot mark failed Synchronization for user " + s.toString()+ ex.getMessage());
                     }
                     logger.error("Problem synchronizing user account: " + s.toString() + ex.getMessage());
-                    ex.printStackTrace();
                 }
             }
 
@@ -154,17 +151,22 @@ public class Synchronizer extends Thread {
         switch (transfertType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
+                logger.info("transfert files from device to LFC for user" +s.toString());
                 transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource() );
                 break;
             case LFCToDevice:
                 //LFC->SyncedDevice 
+                logger.info("transfert files from LFC to device for user" +s.toString());
                 transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
                 //SyncedDevice -> LFC
+                logger.info("transfert files from device to LFC for user" +s.toString());
                 transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 //LFC->SyncedDevice
+                logger.info("transfert files from LFC to device for user" +s.toString());
                 transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+               
                 break;
         }
     }
