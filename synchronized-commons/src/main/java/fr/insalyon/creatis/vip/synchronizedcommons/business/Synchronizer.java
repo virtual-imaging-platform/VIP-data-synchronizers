@@ -74,17 +74,6 @@ public class Synchronizer extends Thread {
     @Override
     public void run() {
         List<Synchronization> synchronizations = null;
-        //rest data base parameters when restart the agent 
-        try {
-            synchronizations = sd.getSynchronization();
-            for (Synchronization s : synchronizations) {
-                sd.setSynchronizationNotFailed(s);
-                sd.updateNumberSynchronizationFailed(s, 0);
-                sd.updateTheEarliestNextSynchronization(s, new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).getTime());
-            }
-        } catch (SyncException ex) {
-            logger.error("Cannot get user accounts: " + ex.getMessage());
-        }
 
         while (true) {
 
