@@ -120,13 +120,13 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
     }
 
     @Override
-    public List<Synchronization> getSynchronizations() throws SyncException {
+    public List<Synchronization> getActiveSynchronizations() throws SyncException {
 
         ArrayList<Synchronization> userAccounts = new ArrayList<Synchronization>();
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT "
                     + " * "
-                    + "FROM VIPSSHAccounts");
+                    + "FROM VIPSSHAccounts where activate='1'");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String val = rs.getString("validated");
@@ -149,7 +149,8 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             Statement stat = connection.createStatement();
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
-                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp DEFAULT CURRENT_TIMESTAMP, numberSynchronizationFailed INT, transfertType VARCHAR(255), deleteFilesFromSource BOOLEAN, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp DEFAULT CURRENT_TIMESTAMP, numberSynchronizationFailed INT, "
+                    + "transfertType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, activate BOOLEAN DEFAULT 1, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {

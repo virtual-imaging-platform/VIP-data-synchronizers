@@ -45,7 +45,7 @@ public interface SyncedDeviceDAO {
      * @return
      * @throws SyncException
      */
-    public List<Synchronization> getSynchronizations() throws SyncException;
+    public List<Synchronization> getActiveSynchronizations() throws SyncException;
 
     /**
      * update the TheEarliestNextSynchronistation

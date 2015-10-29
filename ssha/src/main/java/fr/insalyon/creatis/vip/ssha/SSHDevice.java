@@ -159,8 +159,8 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public List<Synchronization> getSynchronization() throws SyncException {
-        return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getSynchronizations();
+    public List<Synchronization> getActiveSynchronization() throws SyncException {
+        return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getActiveSynchronizations();
     }
 
     @Override

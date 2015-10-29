@@ -78,7 +78,7 @@ public class Synchronizer extends Thread {
         while (true) {
 
             try {
-                synchronizations = sd.getSynchronization();
+                synchronizations = sd.getActiveSynchronization();
             } catch (SyncException ex) {
                 logger.error("Cannot get user accounts: " + ex.getMessage());
             }

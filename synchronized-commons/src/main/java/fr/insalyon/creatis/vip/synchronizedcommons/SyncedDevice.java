@@ -80,7 +80,7 @@ public interface SyncedDevice {
      * @return
      * @throws SyncException
      */
-    public List<Synchronization> getSynchronization() throws SyncException;
+    public List<Synchronization> getActiveSynchronization() throws SyncException;
 
     /**
      * Gets the revision of a remote file.
