@@ -29,9 +29,9 @@ public class DataBaseOperations {
     boolean validated = true;
     boolean authFailed = false;
     String syncedLFCDir = "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh";
-    boolean deleteFilesFromSource=false;
+    boolean deleteFilesFromSource = false;
     TransfertType transfertType = TransfertType.Synchronization;
-    private static String dbName = "test";
+    private static String dbName = "vip";
     private static String user = "root";
     private static String password = "nouhanouha";
     private static String jdbUrl = "jdbc:mysql://localhost/" + dbName;

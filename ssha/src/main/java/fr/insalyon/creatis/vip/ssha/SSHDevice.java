@@ -228,12 +228,11 @@ public class SSHDevice implements SyncedDevice {
         } catch (JSchException ex) {
             throw new SyncException(ex);
         } catch (SftpException ex) {
-            ex.printStackTrace();
             throw new SyncException(ex);
         }
     }
 
-    private void connect() {
+    private void connect() throws SyncException {
         JSch jsch = new JSch();
         try {
             jsch.addIdentity(privateKeyFile, privateKeyPass);
@@ -247,7 +246,7 @@ public class SSHDevice implements SyncedDevice {
 
             session.connect();
         } catch (JSchException ex) {
-            java.util.logging.Logger.getLogger(Agent.class.getName()).log(Level.SEVERE, null, ex);
+            throw new SyncException(ex);
         }
     }
 
@@ -289,41 +288,39 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) {
+    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException {
         try {
             return SSHMySQLDAO.getInstance(jdbcUrl, username, password).isMustWaitBeforeNextSynchronization(ua);
         } catch (SyncException ex) {
-            java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
+            throw new SyncException(ex);
         }
-        return false;
 
     }
 
     @Override
-    public int getNumberSynchronizationFailed(Synchronization ua) {
+    public int getNumberSynchronizationFailed(Synchronization ua) throws SyncException {
         try {
             return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getNumberSynchronizationFailed(ua);
         } catch (SyncException ex) {
-            java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
+            throw new SyncException(ex);
         }
-        return 0;
     }
 
     @Override
-    public void updateTheEarliestNextSynchronization(Synchronization ua, long duration) {
+    public void updateTheEarliestNextSynchronization(Synchronization ua, long duration) throws SyncException {
         try {
             SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateTheEarliestNextSynchronistation(ua, duration);
         } catch (SyncException ex) {
-            java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
+            throw new SyncException(ex);
         }
     }
 
     @Override
-    public void updateNumberSynchronizationFailed(Synchronization ua, int number) {
+    public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
         try {
             SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateNumberSynchronizationFailed(ua, number);
         } catch (SyncException ex) {
-            java.util.logging.Logger.getLogger(SSHDevice.class.getName()).log(Level.SEVERE, null, ex);
+            throw new SyncException(ex);
         }
     }
 

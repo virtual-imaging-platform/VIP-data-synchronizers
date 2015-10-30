@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -73,17 +74,6 @@ public class Synchronizer extends Thread {
     @Override
     public void run() {
         List<Synchronization> synchronizations = null;
-        //rest data base parameters when restart the agent 
-        try {
-            synchronizations = sd.getSynchronization();
-            for (Synchronization s : synchronizations) {
-                sd.setSynchronizationNotFailed(s);
-                sd.updateNumberSynchronizationFailed(s, 0);
-                sd.updateTheEarliestNextSynchronization(s, new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).getTime());
-            }
-        } catch (SyncException ex) {
-            logger.error("Cannot get user accounts: " + ex.getMessage());
-        }
 
         while (true) {
 
@@ -91,7 +81,6 @@ public class Synchronizer extends Thread {
                 synchronizations = sd.getSynchronization();
             } catch (SyncException ex) {
                 logger.error("Cannot get user accounts: " + ex.getMessage());
-                ex.printStackTrace();
             }
 
             for (Synchronization s : synchronizations) {
@@ -115,15 +104,17 @@ public class Synchronizer extends Thread {
                         }
                     }
                 } catch (SyncException ex) {
-                    sd.updateNumberSynchronizationFailed(s, sd.getNumberSynchronizationFailed(s) + 1);
+                    try {
+                        sd.updateNumberSynchronizationFailed(s, sd.getNumberSynchronizationFailed(s) + 1);
+                    } catch (SyncException ex1) {
+                        logger.error("Cannot update NumberSynchronizationFailed " + ex1.getMessage());
+                    }
                     try {
                         sd.setSynchronizationFailed(s);
-                    } catch (SyncException ex1) {
-                        logger.error("Cannot mark failed Synchronization for user " + s.toString());
-                        ex.printStackTrace();
+                    } catch (SyncException ex2) {
+                        logger.error("Cannot mark failed Synchronization for user " + s.toString() + ex2.getMessage());
                     }
                     logger.error("Problem synchronizing user account: " + s.toString() + ex.getMessage());
-                    ex.printStackTrace();
                 }
             }
 
@@ -154,17 +145,22 @@ public class Synchronizer extends Thread {
         switch (transfertType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
-                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource() );
+                logger.info("transfert files from device to LFC for user" + s.toString());
+                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case LFCToDevice:
                 //LFC->SyncedDevice 
+                logger.info("transfert files from LFC to device for user" + s.toString());
                 transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
                 //SyncedDevice -> LFC
+                logger.info("transfert files from device to LFC for user" + s.toString());
                 transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 //LFC->SyncedDevice
+                logger.info("transfert files from LFC to device for user" + s.toString());
                 transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+
                 break;
         }
     }
@@ -198,7 +194,7 @@ public class Synchronizer extends Thread {
         return false;
     }
 
-    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
+    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) throws SyncException {
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
         sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + Math.pow(2, sd.getNumberSynchronizationFailed(ua)) * 1000 * sd.getNbSecondFromConfigFile()));
 

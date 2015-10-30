@@ -1,32 +1,33 @@
     /*
-    * To change this template, choose Tools | Templates
-    * and open the template in the editor.
-    */
-    package fr.insalyon.creatis.vip.ssha;
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package fr.insalyon.creatis.vip.ssha;
 
-    import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDeviceDAO;
-    import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-    import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
-    import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
-    import java.sql.Connection;
-    import java.sql.DriverManager;
-    import java.sql.PreparedStatement;
-    import java.sql.ResultSet;
-    import java.sql.SQLException;
-    import java.sql.Statement;
-    import java.sql.Timestamp;
-    import java.util.ArrayList;
-    import java.util.Calendar;
-    import java.util.List;
-    import org.apache.log4j.Logger;
+import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDeviceDAO;
+import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
 
-    /**
-    * DAO for SSH synchronizations.
-    *
-    * @author Tristan Glatard
-    * @author Nouha Boujelben
-    */
-    public class SSHMySQLDAO implements SyncedDeviceDAO {
+/**
+ * DAO for SSH synchronizations.
+ *
+ * @author Tristan Glatard
+ * @author Nouha Boujelben
+ */
+public class SSHMySQLDAO implements SyncedDeviceDAO {
 
     private static SSHMySQLDAO instance = null;
     private Connection connection;
@@ -56,6 +57,7 @@
                 instance = new SSHMySQLDAO(jdbcUrl, userName, password);
             }
         } catch (SQLException ex) {
+            logger.error(ex);
             throw new SyncException(ex);
         }
         return instance;
@@ -77,6 +79,7 @@
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
+            logger.error("can not validate synchronization " + ex);
             throw new SyncException(ex);
         }
     }
@@ -93,6 +96,7 @@
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
+            logger.error("can not set synchronization to not failed " + ex);
             throw new SyncException(ex);
         }
     }
@@ -110,6 +114,7 @@
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
+            logger.error("can not set synchronization to failed " + ex);
             throw new SyncException(ex);
         }
     }
@@ -132,6 +137,7 @@
             ps.close();
             return userAccounts;
         } catch (SQLException ex) {
+            logger.error("can not get list synchronization accounts " + ex);
             throw new SyncException(ex);
         }
 
@@ -147,7 +153,9 @@
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {
+            logger.error("can not create table VIPSSHAccounts " + ex);
             throw new SyncException(ex);
+
         }
 
     }
@@ -174,9 +182,11 @@
             try {
                 connection = DriverManager.getConnection(jdbcUrl, userName, password);
             } catch (SQLException ex) {
+                logger.error(ex);
                 throw new SyncException(ex);
             }
         } catch (ClassNotFoundException ex) {
+            logger.error(ex);
             throw new SyncException(ex);
         }
     }
@@ -206,6 +216,7 @@
             ps.close();
 
         } catch (SQLException ex) {
+            logger.error("can not update the TheEarliestNextSynchronistation " + ex);
             throw new SyncException(ex);
         }
 
@@ -237,6 +248,7 @@
             return date;
 
         } catch (SQLException ex) {
+            logger.error("can not get TheEarliestNextSynchronistation " + ex);
             throw new SyncException(ex);
         }
 
@@ -253,13 +265,19 @@
 
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 
-        if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
-            return false;
-        } else {
-            return true;
+        try {
+            if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (SyncException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
         }
 
     }
+
     @Override
     public int getNumberSynchronizationFailed(Synchronization ua) throws SyncException {
 
@@ -277,11 +295,13 @@
             }
             return minute;
         } catch (SQLException ex) {
+            logger.error(ex);
             throw new SyncException(ex);
         }
     }
-        @Override
-        public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
+
+    @Override
+    public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
 
         try {
 
@@ -296,7 +316,8 @@
             ps.close();
 
         } catch (SQLException ex) {
+            logger.error("can't update NumberSynchronizationFailed " + ex);
             throw new SyncException(ex);
         }
     }
-    }
+}
