@@ -156,10 +156,10 @@ public class Synchronizer extends Thread {
             case Synchronization:
                 //SyncedDevice -> LFC
                 logger.info("transfer files from device to LFC for user" + s.toString());
-                transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+                transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir,false);
                 //LFC->SyncedDevice
                 logger.info("transfer files from LFC to device for user" + s.toString());
-                transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+                transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
 
                 break;
         }
