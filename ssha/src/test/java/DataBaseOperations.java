@@ -1,6 +1,6 @@
 
 import fr.insalyon.creatis.vip.ssha.SSHMySQLDAO;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,7 +30,7 @@ public class DataBaseOperations {
     boolean authFailed = false;
     String syncedLFCDir = "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh";
     boolean deleteFilesFromSource = false;
-    TransfertType transfertType = TransfertType.Synchronization;
+    TransferType transferType = TransferType.Synchronization;
     private static String dbName = "vip";
     private static String user = "root";
     private static String password = "nouhanouha";
@@ -47,14 +47,14 @@ public class DataBaseOperations {
     public void addRecord() {
         try {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO VIPSSHAccounts(email, validated, auth_failed, LFCDir,transfertType, sshUser, sshHost, sshDir, sshPort, deleteFilesFromSource) "
+                    "INSERT INTO VIPSSHAccounts(email, validated, auth_failed, LFCDir,transferType, sshUser, sshHost, sshDir, sshPort, deleteFilesFromSource) "
                     + "VALUES (?, ?, ?, ?,?, ?, ?, ?, ?, ?)");
 
             ps.setString(1, email);
             ps.setBoolean(2, validated);
             ps.setBoolean(3, authFailed);
             ps.setString(4, syncedLFCDir);
-            ps.setString(5, transfertType.toString());
+            ps.setString(5, transferType.toString());
             ps.setString(6, userName);
             ps.setString(7, hostName);
             ps.setString(8, directoryName);

@@ -6,7 +6,7 @@
 package fr.insalyon.creatis.vip.ssha;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class SSHDeviceTest {
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         System.setProperty("logfile.name", "./ssha.log");
-        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransfertType.Synchronization, "nouha", "localhost", "/home/nouha/r", 22, true);
+        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransferType.Synchronization, "nouha", "localhost", "/home/nouha/r", 22, true);
     }
     @Rule
     public final ExpectedException thrown2 = ExpectedException.none();
@@ -111,7 +111,7 @@ public class SSHDeviceTest {
     public void testGetSynchronizations() throws SyncException {
         thrown2.expect(SyncException.class);
         SSHMySQLDAO sSHMySQLDAO = SSHMySQLDAO.getInstance(ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
-        assertEquals(2, sSHMySQLDAO.getSynchronizations().size());
+        assertEquals(2, sSHMySQLDAO.getActiveSynchronizations().size());
         throw new SyncException("get synchronizations failed");
     }
 

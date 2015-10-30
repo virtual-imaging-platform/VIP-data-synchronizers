@@ -9,7 +9,7 @@ package fr.insalyon.creatis.vip.synchronizedcommons;
  *
  * @author Nouha Boujelben
  */
-public enum TransfertType {
+public enum TransferType {
 
     LFCToDevice,
     DeviceToLFC,

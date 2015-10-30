@@ -6,7 +6,7 @@ package fr.insalyon.creatis.vip.ssha;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDeviceDAO;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -130,7 +130,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String val = rs.getString("validated");
-                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"), TransfertType.valueOf(rs.getString("transfertType")),
+                Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"), TransferType.valueOf(rs.getString("transferType")),
                         rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"), rs.getBoolean("deleteFilesFromSource"));
                 userAccounts.add(ua);
             }
@@ -150,7 +150,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
                     + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp DEFAULT CURRENT_TIMESTAMP, numberSynchronizationFailed INT, "
-                    + "transfertType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, activate BOOLEAN DEFAULT 1, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + "transferType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, activate BOOLEAN DEFAULT 1, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {
