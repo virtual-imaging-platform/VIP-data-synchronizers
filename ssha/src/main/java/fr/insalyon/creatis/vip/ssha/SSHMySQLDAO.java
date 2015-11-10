@@ -79,7 +79,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
-            logger.error("can not validate synchronization " + ex);
+            logger.error("Can not validate synchronization " + ex);
             throw new SyncException(ex);
         }
     }
@@ -96,7 +96,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
-            logger.error("can not set synchronization to not failed " + ex);
+            logger.error("Can not set synchronization to not failed " + ex);
             throw new SyncException(ex);
         }
     }
@@ -114,7 +114,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
-            logger.error("can not set synchronization to failed " + ex);
+            logger.error("Can not set synchronization to failed " + ex);
             throw new SyncException(ex);
         }
     }
@@ -126,7 +126,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT "
                     + " * "
-                    + "FROM VIPSSHAccounts where activate='1'");
+                    + "FROM VIPSSHAccounts where active='1'");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String val = rs.getString("validated");
@@ -137,7 +137,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.close();
             return userAccounts;
         } catch (SQLException ex) {
-            logger.error("can not get list synchronization accounts " + ex);
+            logger.error("Can not get list synchronization accounts " + ex);
             throw new SyncException(ex);
         }
 
@@ -150,11 +150,11 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
                     + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp DEFAULT CURRENT_TIMESTAMP, numberSynchronizationFailed INT, "
-                    + "transferType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, activate BOOLEAN DEFAULT 1, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + "transferType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, active BOOLEAN DEFAULT 1, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {
-            logger.error("can not create table VIPSSHAccounts " + ex);
+            logger.error("Can not create table VIPSSHAccounts " + ex);
             throw new SyncException(ex);
 
         }
@@ -217,7 +217,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.close();
 
         } catch (SQLException ex) {
-            logger.error("can not update the TheEarliestNextSynchronistation " + ex);
+            logger.error("Can not update the TheEarliestNextSynchronistation " + ex);
             throw new SyncException(ex);
         }
 
@@ -249,7 +249,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             return date;
 
         } catch (SQLException ex) {
-            logger.error("can not get TheEarliestNextSynchronistation " + ex);
+            logger.error("Can not get TheEarliestNextSynchronistation " + ex);
             throw new SyncException(ex);
         }
 
@@ -266,15 +266,10 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 
-        try {
-            if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (SyncException ex) {
-            logger.error(ex);
-            throw new SyncException(ex);
+        if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
+            return false;
+        } else {
+            return true;
         }
 
     }
@@ -317,7 +312,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             ps.close();
 
         } catch (SQLException ex) {
-            logger.error("can't update NumberSynchronizationFailed " + ex);
+            logger.error("Can't update NumberSynchronizationFailed " + ex);
             throw new SyncException(ex);
         }
     }

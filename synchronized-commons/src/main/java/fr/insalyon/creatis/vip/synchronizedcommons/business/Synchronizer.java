@@ -12,7 +12,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -145,20 +144,20 @@ public class Synchronizer extends Thread {
         switch (transferType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
-                logger.info("transfer files from device to LFC for user" + s.toString());
+                logger.info("Transfer files from device to LFC for user" + s.toString());
                 transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case LFCToDevice:
                 //LFC->SyncedDevice 
-                logger.info("transfer files from LFC to device for user" + s.toString());
+                logger.info("Transfer files from LFC to device for user" + s.toString());
                 transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
                 //SyncedDevice -> LFC
-                logger.info("transfer files from device to LFC for user" + s.toString());
-                transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir,false);
+                logger.info("Transfer files from device to LFC for user" + s.toString());
+                transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
                 //LFC->SyncedDevice
-                logger.info("transfer files from LFC to device for user" + s.toString());
+                logger.info("Transfer files from LFC to device for user" + s.toString());
                 transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
 
                 break;
@@ -209,7 +208,7 @@ public class Synchronizer extends Thread {
 
                 if (lfcRev == null) {
                     //file is in SyncedDevice but not in LFC: copy to lfc
-                    logger.info("==> (new file)" + String.format("%s - %s - %s -%s / %s", s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
+                    logger.info("==> (New file)" + String.format("%s - %s - %s -%s / %s", s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
                     if (!ignorePath(syncedShortPath)) {
                         copyToLFC(syncedShortPath, s, remoteRevision);
                         if (deleteFilesFromSource) {

@@ -289,44 +289,37 @@ public class SSHDevice implements SyncedDevice {
 
     @Override
     public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException {
-        try {
-            return SSHMySQLDAO.getInstance(jdbcUrl, username, password).isMustWaitBeforeNextSynchronization(ua);
-        } catch (SyncException ex) {
-            throw new SyncException(ex);
-        }
+
+        return SSHMySQLDAO.getInstance(jdbcUrl, username, password).isMustWaitBeforeNextSynchronization(ua);
 
     }
 
     @Override
     public int getNumberSynchronizationFailed(Synchronization ua) throws SyncException {
-        try {
-            return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getNumberSynchronizationFailed(ua);
-        } catch (SyncException ex) {
-            throw new SyncException(ex);
-        }
+
+        return SSHMySQLDAO.getInstance(jdbcUrl, username, password).getNumberSynchronizationFailed(ua);
+
     }
 
     @Override
     public void updateTheEarliestNextSynchronization(Synchronization ua, long duration) throws SyncException {
-        try {
-            SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateTheEarliestNextSynchronistation(ua, duration);
-        } catch (SyncException ex) {
-            throw new SyncException(ex);
-        }
+
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateTheEarliestNextSynchronistation(ua, duration);
+
     }
 
     @Override
     public void updateNumberSynchronizationFailed(Synchronization ua, int number) throws SyncException {
-        try {
-            SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateNumberSynchronizationFailed(ua, number);
-        } catch (SyncException ex) {
-            throw new SyncException(ex);
-        }
+
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateNumberSynchronizationFailed(ua, number);
+
     }
 
     @Override
     public double getNbSecondFromConfigFile() {
+
         return ConfigFile.getInstance().getNbSecond();
+
     }
 
 }
