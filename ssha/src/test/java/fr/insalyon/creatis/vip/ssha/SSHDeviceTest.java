@@ -6,7 +6,7 @@
 package fr.insalyon.creatis.vip.ssha;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -22,14 +22,14 @@ import org.junit.rules.ExpectedException;
 
 /* 
 
-To test this class you have to:
-**reconfigure the config file especially the :ssha.auth.privatekeyfile to point it to the specific file
-**paramters of the data base: ssha.db.jdbcurl, ssha.db.user, ssha.db.password
+ To test this class you have to:
+ **reconfigure the config file especially the :ssha.auth.privatekeyfile to point it to the specific file
+ **paramters of the data base: ssha.db.jdbcurl, ssha.db.user, ssha.db.password
 
-**SSH TUNNEL FOR THE MYSQL SERVER
-    ssh -L [LOCAL PORT]:localhost:3306 [USERNAME]@vip.creatis.insa-lyon.fr -f -N 
-**
-*/
+ **SSH TUNNEL FOR THE MYSQL SERVER
+ ssh -L [LOCAL PORT]:localhost:3306 [USERNAME]@vip.creatis.insa-lyon.fr -f -N 
+ **
+ */
 public class SSHDeviceTest {
 
     static Synchronization ua;
@@ -40,24 +40,27 @@ public class SSHDeviceTest {
 
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-         System.setProperty("logfile.name", "./ssha.log");
-         ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransfertType.Synchronization,"nouha","localhost","/home/nouha/r",22,true);
+        System.setProperty("logfile.name", "./ssha.log");
+        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransferType.Synchronization, "nouha", "localhost", "/home/nouha/r", 22, true);
     }
-       
+    @Rule
+    public final ExpectedException thrown2 = ExpectedException.none();
+
     /**
      * Test of getNumberSynchronizationFailed method, of class SSHDevice.
      */
     @Test
-    public void testUpdateNumberSynchronizationFailed() {
-       
+    public void testUpdateNumberSynchronizationFailed() throws SyncException {
+
         System.out.println("updateNumberSynchronizationFailed");
+        thrown2.expect(SyncException.class);
         int number = 4;
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
         instance.updateNumberSynchronizationFailed(ua, number);
         assertEquals(number, instance.getNumberSynchronizationFailed(ua));
     }
 
-     /**
+    /**
      * Test of updateTheEarliestNextSynchronization method, of class SSHDevice.
      *
      * * @throws
@@ -83,9 +86,10 @@ public class SSHDeviceTest {
      * Test of mustWaitBeforeNextSynchronization method, of class SSHDevice.
      */
     @Test
-    public void testMustWaitBeforeNextSynchronization() {
+    public void testMustWaitBeforeNextSynchronization() throws SyncException {
+        thrown2.expect(SyncException.class);
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
-        boolean expResult =false;
+        boolean expResult = false;
         boolean result = instance.isMustWaitBeforeNextSynchronization(ua);
         assertEquals(expResult, result);
 
@@ -93,9 +97,7 @@ public class SSHDeviceTest {
 
     /**
      * Test of updateNumberSynchronizationFailed method, of class SSHDevice.
-    */
- 
-     
+     */
     @Test
     public void testGetNumberOfMinuteFromConfigFile() {
         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
@@ -105,25 +107,21 @@ public class SSHDeviceTest {
 
     }
 
-    @Rule
-    public final ExpectedException thrown2 = ExpectedException.none();
-
     @Test
     public void testGetSynchronizations() throws SyncException {
         thrown2.expect(SyncException.class);
         SSHMySQLDAO sSHMySQLDAO = SSHMySQLDAO.getInstance(ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
-        assertEquals(2, sSHMySQLDAO.getSynchronizations().size());
+        assertEquals(2, sSHMySQLDAO.getActiveSynchronizations().size());
         throw new SyncException("get synchronizations failed");
     }
-    @Rule
-    public final ExpectedException thrown3 = ExpectedException.none();
+
     @Test
-     public void deleteFile() throws SyncException {
-         thrown2.expect(SyncException.class);
-         SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
-         instance.setSynchronization(ua);
-         instance.deleteFile("rr.txt");
-         throw new SyncException("failed to delete file");
+    public void deleteFile() throws SyncException {
+        thrown2.expect(SyncException.class);
+        SSHDevice instance = new SSHDevice(ConfigFile.getInstance().getPrivKeyFile(), ConfigFile.getInstance().getPrivKeyPass(), ConfigFile.getInstance().getLOCAL_TEMP(), ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword());
+        instance.setSynchronization(ua);
+        instance.deleteFile("rr.txt");
+        throw new SyncException("failed to delete file");
 
     }
 

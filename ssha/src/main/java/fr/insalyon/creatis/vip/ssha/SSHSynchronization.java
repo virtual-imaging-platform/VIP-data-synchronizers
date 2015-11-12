@@ -5,7 +5,7 @@
 package fr.insalyon.creatis.vip.ssha;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 
 /**
  * Bean object representing an SSH synchronization.
@@ -26,14 +26,14 @@ public class SSHSynchronization extends Synchronization {
      * @param validated
      * @param authFailed
      * @param syncedLFCDir
-     * @param transfertType
+     * @param transferType
      * @param userName
      * @param hostName
      * @param directoryName
      * @param port
      */
-    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir,TransfertType transfertType, String userName, String hostName, String directoryName, int port,boolean deleteFilesFromSource) {
-        super(email, validated, authFailed, syncedLFCDir,transfertType,deleteFilesFromSource);
+    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir,TransferType transferType, String userName, String hostName, String directoryName, int port,boolean deleteFilesFromSource) {
+        super(email, validated, authFailed, syncedLFCDir,transferType,deleteFilesFromSource);
         this.sshUserName = userName;
         this.sshHostName = hostName;
         this.sshDirectoryName = directoryName;

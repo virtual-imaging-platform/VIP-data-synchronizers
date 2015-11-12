@@ -6,7 +6,7 @@ package fr.insalyon.creatis.vip.synchronizedcommons.business;
 
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDevice;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import fr.insalyon.creatis.vip.synchronizedcommons.TransfertType;
+import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -73,25 +73,13 @@ public class Synchronizer extends Thread {
     @Override
     public void run() {
         List<Synchronization> synchronizations = null;
-        //rest data base parameters when restart the agent 
-        try {
-            synchronizations = sd.getSynchronization();
-            for (Synchronization s : synchronizations) {
-                sd.setSynchronizationNotFailed(s);
-                sd.updateNumberSynchronizationFailed(s, 0);
-                sd.updateTheEarliestNextSynchronization(s, new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).getTime());
-            }
-        } catch (SyncException ex) {
-            logger.error("Cannot get user accounts: " + ex.getMessage());
-        }
 
         while (true) {
 
             try {
-                synchronizations = sd.getSynchronization();
+                synchronizations = sd.getActiveSynchronization();
             } catch (SyncException ex) {
                 logger.error("Cannot get user accounts: " + ex.getMessage());
-                ex.printStackTrace();
             }
 
             for (Synchronization s : synchronizations) {
@@ -115,15 +103,17 @@ public class Synchronizer extends Thread {
                         }
                     }
                 } catch (SyncException ex) {
-                    sd.updateNumberSynchronizationFailed(s, sd.getNumberSynchronizationFailed(s) + 1);
+                    try {
+                        sd.updateNumberSynchronizationFailed(s, sd.getNumberSynchronizationFailed(s) + 1);
+                    } catch (SyncException ex1) {
+                        logger.error("Cannot update NumberSynchronizationFailed " + ex1.getMessage());
+                    }
                     try {
                         sd.setSynchronizationFailed(s);
-                    } catch (SyncException ex1) {
-                        logger.error("Cannot mark failed Synchronization for user " + s.toString());
-                        ex.printStackTrace();
+                    } catch (SyncException ex2) {
+                        logger.error("Cannot mark failed Synchronization for user " + s.toString() + ex2.getMessage());
                     }
                     logger.error("Problem synchronizing user account: " + s.toString() + ex.getMessage());
-                    ex.printStackTrace();
                 }
             }
 
@@ -150,21 +140,26 @@ public class Synchronizer extends Thread {
         if (lfcFiles == null || remoteFiles == null) {
             return;
         }
-        TransfertType transfertType = s.getTransfertType();
-        switch (transfertType) {
+        TransferType transferType = s.getTransferType();
+        switch (transferType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
-                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource() );
+                logger.info("Transfer files from device to LFC for user" + s.toString());
+                transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case LFCToDevice:
                 //LFC->SyncedDevice 
-                transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+                logger.info("Transfer files from LFC to device for user" + s.toString());
+                transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
                 //SyncedDevice -> LFC
-                transfertFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+                logger.info("Transfer files from device to LFC for user" + s.toString());
+                transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
                 //LFC->SyncedDevice
-                transfertFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
+                logger.info("Transfer files from LFC to device for user" + s.toString());
+                transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
+
                 break;
         }
     }
@@ -198,13 +193,13 @@ public class Synchronizer extends Thread {
         return false;
     }
 
-    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) {
+    private void updateExponentialBackoff(SyncedDevice sd, Synchronization ua) throws SyncException {
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
         sd.updateTheEarliestNextSynchronization(ua, (long) (currentTimestamp.getTime() + Math.pow(2, sd.getNumberSynchronizationFailed(ua)) * 1000 * sd.getNbSecondFromConfigFile()));
 
     }
 
-    private void transfertFilesFromSynchDeviceToLFC(Synchronization s, SyncedDevice sd, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
+    private void transferFilesFromSynchDeviceToLFC(Synchronization s, SyncedDevice sd, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
 
         for (Map.Entry<String, String> p : remoteFiles.entrySet()) {
             if (countFiles < fileLimit) {
@@ -213,7 +208,7 @@ public class Synchronizer extends Thread {
 
                 if (lfcRev == null) {
                     //file is in SyncedDevice but not in LFC: copy to lfc
-                    logger.info("==> (new file)" + String.format("%s - %s - %s -%s / %s", s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
+                    logger.info("==> (New file)" + String.format("%s - %s - %s -%s / %s", s.getEmail(), syncedShortPath, syncedLFCDir, countFiles, fileLimit));
                     if (!ignorePath(syncedShortPath)) {
                         copyToLFC(syncedShortPath, s, remoteRevision);
                         if (deleteFilesFromSource) {
@@ -252,7 +247,7 @@ public class Synchronizer extends Thread {
         }
     }
 
-    private void transfertFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
+    private void transferFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, String> remoteFiles, HashMap<String, String> lfcFiles, int countFiles, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
 
         for (Map.Entry<String, String> q : lfcFiles.entrySet()) {
 
