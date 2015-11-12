@@ -268,9 +268,8 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
         if (getTheEarliestNextSynchronistation(ua).before(currentTimestamp) || getTheEarliestNextSynchronistation(ua).equals(currentTimestamp)) {
             return false;
-        } else {
-            return true;
         }
+        return true;
 
     }
 
