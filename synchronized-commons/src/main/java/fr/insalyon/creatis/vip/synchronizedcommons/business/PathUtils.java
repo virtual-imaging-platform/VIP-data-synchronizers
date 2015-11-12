@@ -8,11 +8,11 @@ import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDevice;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
 
 /**
- * A class with utility methods to manipulate paths.
- * There are different types
+ * A class with utility methods to manipulate paths. There are different types
  * of paths: short lfc path (relative to the synced LFC directory), full lfc
- * paths, and short sync path (short sync path == short lfc path). But there is no
- * full sync path (full sync path is only known to the SyncedDevice), local path
+ * paths, and short sync path (short sync path == short lfc path). But there is
+ * no full sync path (full sync path is only known to the SyncedDevice), local
+ * path
  *
  * @author Tristan Glatard
  */
@@ -46,11 +46,11 @@ public class PathUtils {
      * @param sd
      * @return
      */
-    public static String getLocalPathFromLFCLong(String s, SyncedDevice sd) {
+    public static String getLocalPathFromLFCLong(String s, SyncedDevice sd) throws SyncException {
         return cleanse(sd.getTempDir() + "/" + s);
     }
 
-    public static String getLocalPathFromSyncShort(String s, SyncedDevice sd, Synchronization sy) {
+    public static String getLocalPathFromSyncShort(String s, SyncedDevice sd, Synchronization sy) throws SyncException {
         return cleanse(getLocalPathFromLFCLong(getLFCLongFromSyncShort(s, sy), sd));
     }
 
@@ -76,8 +76,9 @@ public class PathUtils {
 
     /**
      * Removes double '/' from a path.
+     *
      * @param s
-     * @return 
+     * @return
      */
     public static String cleanse(String s) {
         return s.replaceAll("//", "/");

@@ -80,7 +80,7 @@ public interface SyncedDevice {
      * @return
      * @throws SyncException
      */
-    public List<Synchronization> getSynchronization() throws SyncException;
+    public List<Synchronization> getActiveSynchronization() throws SyncException;
 
     /**
      * Gets the revision of a remote file.
@@ -96,21 +96,21 @@ public interface SyncedDevice {
      *
      * @param s
      */
-    public void setSynchronization(Synchronization s);
+    public void setSynchronization(Synchronization s) throws SyncException;
 
     /**
      * The temporary directory where to store files locally.
      *
      * @return
      */
-    public String getTempDir();
+    public String getTempDir() throws SyncException;
 
     /**
      * A string contained in the "authentication failed" error message.
      *
      * @return
      */
-    public String getAuthFailedString();
+    public String getAuthFailedString() throws SyncException;
 
     /**
      *
@@ -118,21 +118,21 @@ public interface SyncedDevice {
      * @return false if theEarliestNextSynchronization is before or equal to the
      * current date
      */
-    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua);
+    public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException;
 
     /**
      *
      * @param ua
      * @return the number of failed Synchronization
      */
-    public int getNumberSynchronizationFailed(Synchronization ua);
+    public int getNumberSynchronizationFailed(Synchronization ua) throws SyncException;
 
     /**
      *
      * @param ua
      * @param numberSynchFailed set the number of failed Synchronization
      */
-    public void updateNumberSynchronizationFailed(Synchronization ua, int numberSynchFailed);
+    public void updateNumberSynchronizationFailed(Synchronization ua, int numberSynchFailed) throws SyncException;
 
     /**
      *
@@ -140,12 +140,12 @@ public interface SyncedDevice {
      * @param duration the time will added to the current date to update the
      * "theEarliestNextSynchronization"
      */
-    public void updateTheEarliestNextSynchronization(Synchronization ua, long duration);
+    public void updateTheEarliestNextSynchronization(Synchronization ua, long duration) throws SyncException;
 
     /**
      *
      * @return The slot time used for the exponential back-off algorithm
      */
-    public double getNbSecondFromConfigFile();
+    public double getNbSecondFromConfigFile() throws SyncException;
 
 }

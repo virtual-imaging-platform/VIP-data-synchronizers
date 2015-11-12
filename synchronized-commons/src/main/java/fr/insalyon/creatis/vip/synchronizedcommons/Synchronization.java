@@ -15,15 +15,15 @@ public class Synchronization {
     private boolean validated;
     private final boolean synchFailed;
     private final String syncedLFCDir;
-    private final TransfertType transfertType;
+    private final TransferType transferType;
     private final boolean deleteFilesfromSource;
 
-    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, TransfertType transfertType, boolean deleteFilesfromSource) {
+    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, TransferType transferType, boolean deleteFilesfromSource) {
         this.email = email;
         this.validated = validated;
         this.syncedLFCDir = syncedLFCDir;
         this.synchFailed = synchFailed;
-        this.transfertType = transfertType;
+        this.transferType = transferType;
         this.deleteFilesfromSource = deleteFilesfromSource;
 
     }
@@ -48,8 +48,8 @@ public class Synchronization {
         return synchFailed;
     }
 
-    public TransfertType getTransfertType() {
-        return transfertType;
+    public TransferType getTransferType() {
+        return transferType;
     }
 
     public boolean getDeleteFilesfromSource() {
