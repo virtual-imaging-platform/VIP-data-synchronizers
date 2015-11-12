@@ -135,6 +135,7 @@ public class Synchronizer extends Thread {
         sd.setSynchronization(s);
         String syncedLFCDir = s.getSyncedLFCDir();
         int countFiles = 0; //this will count how many files are synced for a user
+        logger.info("Listing files for synchronization "+s.toString()+" (this may take some time because file checksums are verified).");
         HashMap<String, String> remoteFiles = sd.listFiles("/");
         HashMap<String, String> lfcFiles = lfcu.listLFCDir("/", s);
         if (lfcFiles == null || remoteFiles == null) {
@@ -144,22 +145,17 @@ public class Synchronizer extends Thread {
         switch (transferType) {
             case DeviceToLFC:
                 //SyncedDevice -> LFC
-                logger.info("Transfer files from device to LFC for user" + s.toString());
                 transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case LFCToDevice:
                 //LFC->SyncedDevice 
-                logger.info("Transfer files from LFC to device for user" + s.toString());
                 transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, s.getDeleteFilesfromSource());
                 break;
             case Synchronization:
                 //SyncedDevice -> LFC
-                logger.info("Transfer files from device to LFC for user" + s.toString());
                 transferFilesFromSynchDeviceToLFC(s, sd, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
                 //LFC->SyncedDevice
-                logger.info("Transfer files from LFC to device for user" + s.toString());
                 transferFilesFromLFCToSynchDevice(s, remoteFiles, lfcFiles, countFiles, syncedLFCDir, false);
-
                 break;
         }
     }
