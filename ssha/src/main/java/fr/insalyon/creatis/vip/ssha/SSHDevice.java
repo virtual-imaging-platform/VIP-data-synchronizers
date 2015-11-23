@@ -14,8 +14,10 @@ import com.jcraft.jsch.SftpException;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDevice;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -94,6 +96,7 @@ public class SSHDevice implements SyncedDevice {
         connect();
         try {
             HashMap<String, String> map = new HashMap<String, String>();
+
             for (String s : sendCommand("for i in `find " + remoteDir + "/" + dir + " -type f`; do echo -n $i\" ; \"; (md5sum $i 2>/dev/null || echo error) | awk '{print $1}'; done").split("\n")) {
                 if (!s.equals("")) {
                     if (s.split(";").length != 2) {
@@ -261,11 +264,36 @@ public class SSHDevice implements SyncedDevice {
             ((ChannelExec) channel).setCommand(command);
             channel.connect();
             InputStream commandOutput;
+            InputStreamReader err;
+
+            try {
+                err = new InputStreamReader(((ChannelExec) channel).getErrStream());
+            } catch (IOException ex) {
+                throw new SyncException(ex);
+            }
+
             try {
                 commandOutput = channel.getInputStream();
             } catch (IOException ex) {
                 throw new SyncException(ex);
             }
+
+            String incomingLine = null;
+            String lines = null;
+            BufferedReader reader = new BufferedReader(err);
+            while ((incomingLine = reader.readLine()) != null) {
+                if (lines == null) {
+                    lines = incomingLine;
+                } else {
+                    lines += incomingLine;
+                }
+            }
+            if (lines != null) {
+                logger.error("Remote command failed with error message " + lines);
+                reader.close();
+                throw new SyncException("Remote command failed with error message " + lines);
+            }
+
             int readByte;
             try {
                 readByte = commandOutput.read();
@@ -283,6 +311,8 @@ public class SSHDevice implements SyncedDevice {
             channel.disconnect();
             return outputBuffer.toString();
         } catch (JSchException ex) {
+            throw new SyncException(ex);
+        } catch (IOException ex) {
             throw new SyncException(ex);
         }
     }
