@@ -92,12 +92,21 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public HashMap<String, String> listFiles(String dir) throws SyncException {
+    public HashMap<String, String> listFiles(String dir, Synchronization synchronization) throws SyncException {
         connect();
         try {
             HashMap<String, String> map = new HashMap<String, String>();
+            String command;
+            String command1 = "for i in `find " + remoteDir + "/" + dir + " -type f`; do echo -n $i\" ; \"; echo 0; done";
+            String command2 = "for i in `find " + remoteDir + "/" + dir + " -type f`; do echo -n $i\" ; \"; (md5sum $i 2>/dev/null || echo error) | awk '{print $1}'; done";
 
-            for (String s : sendCommand("for i in `find " + remoteDir + "/" + dir + " -type f`; do echo -n $i\" ; \"; (md5sum $i 2>/dev/null || echo error) | awk '{print $1}'; done").split("\n")) {
+            if (SSHMySQLDAO.getInstance(jdbcUrl, username, password).isCheckFilesContent(synchronization)) {
+                command = command2;
+            } else {
+                command = command1;
+            };
+
+            for (String s : sendCommand(command).split("\n")) {
                 if (!s.equals("")) {
                     if (s.split(";").length != 2) {
                         throw new SyncException("Wrong file list: " + s);
@@ -167,13 +176,18 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public String getRevision(String remoteFile) throws SyncException {
-        connect();
-        String realRemotePath = (remoteDir + "/" + remoteFile).replaceAll("//", "/");
-        // logger.info("getting revision of file "+realRemotePath);
-        String res = sendCommand("(md5sum " + realRemotePath + " 2>/dev/null || echo error) | awk '{print $1}';");
-        disconnect();
-        return res;
+    public String getRevision(String remoteFile, Synchronization synchronization) throws SyncException {
+
+        if (SSHMySQLDAO.getInstance(jdbcUrl, username, password).isCheckFilesContent(synchronization)) {
+            connect();
+            String realRemotePath = (remoteDir + "/" + remoteFile).replaceAll("//", "/");
+            // logger.info("getting revision of file "+realRemotePath);
+            String res = sendCommand("(md5sum " + realRemotePath + " 2>/dev/null || echo error) | awk '{print $1}';");
+            disconnect();
+            return res;
+        } else {
+            return "0";
+        }
     }
 
     @Override

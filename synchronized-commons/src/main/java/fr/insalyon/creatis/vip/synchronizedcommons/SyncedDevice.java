@@ -22,7 +22,7 @@ public interface SyncedDevice {
      * @return
      * @throws SyncException
      */
-    public HashMap<String, String> listFiles(String remoteDir) throws SyncException;
+    public HashMap<String, String> listFiles(String remoteDir, Synchronization synchronization) throws SyncException;
 
     /**
      * Copies a remote file to a local directory.
@@ -89,7 +89,7 @@ public interface SyncedDevice {
      * @return
      * @throws SyncException
      */
-    public String getRevision(String remoteFile) throws SyncException;
+    public String getRevision(String remoteFile, Synchronization synchronization) throws SyncException;
 
     /**
      * Sets the synchronization to use.

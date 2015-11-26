@@ -135,7 +135,7 @@ public class Synchronizer extends Thread {
         sd.setSynchronization(s);
         String syncedLFCDir = s.getSyncedLFCDir();
         int countFiles = 0; //this will count how many files are synced for a user
-        HashMap<String, String> remoteFiles = sd.listFiles("/");
+        HashMap<String, String> remoteFiles = sd.listFiles("/", s);
         HashMap<String, String> lfcFiles = lfcu.listLFCDir("/", s);
         if (lfcFiles == null || remoteFiles == null) {
             return;
@@ -264,7 +264,7 @@ public class Synchronizer extends Thread {
                         createLocalDir(PathUtils.getDirFromPath(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd)));
                         lfcu.getLFCFile(lfcPath, PathUtils.getDirFromPath(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd)), s);//  lfcPath, sd),ua);
                         sd.putFile(PathUtils.getLocalPathFromLFCLong(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd), PathUtils.getSyncShortFromLFCShort(lfcPath));//"/"+PathUtils.removeSyncedDir(PathUtils.getL(lfcPath, sd),ua));
-                        lfcu.setRevision(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd.getRevision(PathUtils.getSyncShortFromLFCShort(lfcPath)));
+                        lfcu.setRevision(PathUtils.getLFCLongFromLFCShort(lfcPath, s), sd.getRevision(PathUtils.getSyncShortFromLFCShort(lfcPath), s));
                         if (deleteFilesFromSource) {
                             lfcu.deleteFromLFC(lfcPath, s);
                             logger.info(lfcPath + " was removed from LFC");
