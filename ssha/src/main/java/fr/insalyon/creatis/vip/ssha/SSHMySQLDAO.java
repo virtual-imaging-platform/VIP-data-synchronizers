@@ -315,4 +315,26 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             throw new SyncException(ex);
         }
     }
+
+    public boolean isCheckFilesContent(Synchronization ua) throws SyncException {
+
+        try {
+
+            PreparedStatement ps2 = connection.prepareStatement("select "
+                    + " checkFilesContent from VIPSSHAccounts "
+                    + "WHERE email = ? and LFCDir=?");
+            ps2.setString(1, ua.getEmail());
+            ps2.setString(2, ua.getSyncedLFCDir());
+            ResultSet rs2 = ps2.executeQuery();
+            boolean checkFilesContent = false;
+            while (rs2.next()) {
+                checkFilesContent = rs2.getBoolean("checkFilesContent");
+            }
+            return checkFilesContent;
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+    }
+
 }
