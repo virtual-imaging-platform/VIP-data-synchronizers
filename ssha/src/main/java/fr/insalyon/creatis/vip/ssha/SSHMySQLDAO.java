@@ -373,7 +373,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
                     + ",sizeOfFilesTransferredToDevice=? "
                     + ",numberOfFilesDeletedInDevice=? "
                     + ",sizeOfFilesDeletedInDevice=? "
-                    + "WHERE email = ? and DeviceDir=?");
+                    + "WHERE email = ? and LFCDir=?");
             ps.setInt(1, numberOfFilesTransferredToDevice);
             ps.setDouble(2, sizeOfFilesTransferredToDevice);
             ps.setInt(3, numberOfFilesDeletedInDevice);
