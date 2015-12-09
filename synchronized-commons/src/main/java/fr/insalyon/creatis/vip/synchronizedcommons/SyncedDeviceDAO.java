@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * DAO interface.
  *
- * @author Tristan Glatard, Nouha Boujelben
+ * @author Tristan Glatard
+ * @author Nouha Boujelben
  */
 public interface SyncedDeviceDAO {
 

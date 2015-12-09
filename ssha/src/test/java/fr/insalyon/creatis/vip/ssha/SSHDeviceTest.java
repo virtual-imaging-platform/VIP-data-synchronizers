@@ -41,7 +41,7 @@ public class SSHDeviceTest {
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         System.setProperty("logfile.name", "./ssha.log");
-        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransferType.Synchronization, "nouha", "localhost", "/home/nouha/r", 22, true);
+        ua = new SSHSynchronization("nouha.boujelben@creatis.insa-lyon.fr", true, false, "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh", TransferType.Synchronization, "nouha", "localhost", "/home/nouha/r", 22, true, 0, 0, 0, 0, 0, 0, 0, 0);
     }
     @Rule
     public final ExpectedException thrown2 = ExpectedException.none();
