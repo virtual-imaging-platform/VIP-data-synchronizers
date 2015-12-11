@@ -111,7 +111,7 @@ public class SSHDevice implements SyncedDevice {
             for (String s : sendCommand(command).split("\n")) {
                 if (!s.equals("")) {
                     //add revision the size of file in this List
-                    map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), new FileProperties(Long.valueOf(s.split(";")[1].trim()), s.split(";")[2]));
+                    map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), new FileProperties(Long.valueOf(s.split(";")[1].trim()), s.split(";")[2].trim()));
 
                 }
             }
@@ -182,15 +182,10 @@ public class SSHDevice implements SyncedDevice {
         String realRemotePath = (remoteDir + "/" + remoteFile).replaceAll("//", "/");
         if (SSHMySQLDAO.getInstance(jdbcUrl, username, password).isCheckFilesContent(synchronization)) {
             connect();
-            // logger.info("getting revision of file "+realRemotePath);
-            res = sendCommand("(md5sum " + realRemotePath + " 2>/dev/null || echo error) | awk '{print $1}';echo -n \" ; \"; ls -la " + realRemotePath + "| awk '{print $5}'");
-            logger.info(res);
+            res = sendCommand("(md5sum " + realRemotePath + " 2>/dev/null || echo error) | awk '{print $1}'");
             disconnect();
         } else {
-            connect();
-            res = sendCommand("echo -n 0 \" ; \"; ls -la " + realRemotePath + "| awk '{print $5}'");
-            logger.info(res);
-            disconnect();
+            res = "0";
 
         }
         return res.trim();

@@ -32,9 +32,9 @@ public class SSHSynchronization extends Synchronization {
      * @param directoryName
      * @param port
      */
-    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir, TransferType transferType, String userName, String hostName, String directoryName, int port, boolean deleteFilesFromSource,
+    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir, TransferType transferType, String userName, String hostName, String directoryName, int port, boolean deleteFilesFromSource,boolean checkFilesContent,
             int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) {
-        super(email, validated, authFailed, syncedLFCDir, transferType, deleteFilesFromSource, numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInLFC, sizeOfFilesDeletedInLFC, numberOfFilesDeletedInDevice, sizeOfFilesDeletedInDevice);
+        super(email, validated, authFailed, syncedLFCDir, transferType, deleteFilesFromSource,checkFilesContent, numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInLFC, sizeOfFilesDeletedInLFC, numberOfFilesDeletedInDevice, sizeOfFilesDeletedInDevice);
         this.sshUserName = userName;
         this.sshHostName = hostName;
         this.sshDirectoryName = directoryName;

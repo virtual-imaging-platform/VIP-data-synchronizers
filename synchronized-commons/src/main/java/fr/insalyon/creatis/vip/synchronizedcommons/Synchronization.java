@@ -17,7 +17,8 @@ public class Synchronization {
     private final boolean synchFailed;
     private final String syncedLFCDir;
     private final TransferType transferType;
-    private final boolean deleteFilesfromSource;
+    private final boolean deleteFilesfromSource; 
+    private final boolean checkFilesContent;
     private int numberOfFilesTransferredToLFC;
     private long sizeOfFilesTransferredToLFC;
     private int numberOfFilesTransferredToDevice;
@@ -27,13 +28,14 @@ public class Synchronization {
     private int numberOfFilesDeletedInDevice;
     private long sizeOfFilesDeletedInDevice;
 
-    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, TransferType transferType, boolean deleteFilesfromSource, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) {
+    public Synchronization(String email, boolean validated, boolean synchFailed, String syncedLFCDir, TransferType transferType, boolean deleteFilesfromSource,boolean checkFilesContent, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) {
         this.email = email;
         this.validated = validated;
         this.syncedLFCDir = syncedLFCDir;
         this.synchFailed = synchFailed;
         this.transferType = transferType;
         this.deleteFilesfromSource = deleteFilesfromSource;
+        this.checkFilesContent=checkFilesContent;
         this.numberOfFilesTransferredToLFC = numberOfFilesTransferredToLFC;
         this.sizeOfFilesTransferredToLFC = sizeOfFilesTransferredToLFC;
         this.numberOfFilesTransferredToDevice = numberOfFilesTransferredToDevice;
@@ -136,7 +138,11 @@ public class Synchronization {
     public void setSizeOfFilesDeletedInDevice(long sizeOfFilesDeletedInDevice) {
         this.sizeOfFilesDeletedInDevice = sizeOfFilesDeletedInDevice;
     }
-
+    
+    
+     public boolean isCheckFilesContent() {
+        return checkFilesContent;
+    }
     @Override
     public String toString() {
         return "{" + email + " ; " + syncedLFCDir + "}";

@@ -79,7 +79,6 @@ public class LFCUtils {
                 if (!ignore(entry)) {
                     //add revision the size of file in this List
                     entries.put(entry, new FileProperties(gd.getLength(), gd.getComment()));
-                    logger.error(gd.getLength() + "         " + gd.getComment());
 
                 }
             }
