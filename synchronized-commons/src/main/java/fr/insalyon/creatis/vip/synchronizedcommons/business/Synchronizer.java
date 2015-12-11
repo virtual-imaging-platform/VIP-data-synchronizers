@@ -263,7 +263,7 @@ public class Synchronizer extends Thread {
 
     private void transferFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, FileProperties> remoteFiles, HashMap<String, FileProperties> lfcFiles,
             int countFiles, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC,
-            int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice, String syncedLFCDir, boolean deleteFilesFromSource, boolean checkFilesContent, boolean LFC) throws SyncException {
+            int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice, String syncedLFCDir, boolean deleteFilesFromSource, boolean checkFilesContent, boolean LFCIsRight) throws SyncException {
 
         for (Map.Entry<String, FileProperties> q : lfcFiles.entrySet()) {
 
@@ -278,16 +278,16 @@ public class Synchronizer extends Thread {
                 }
 
                 if (remoteRevision == null) {
-                    //file is in LFC but not in SyncedDevice
+                    //file is in LFCIsRight but not in SyncedDevice
                     if (lfcRev.equals("")) {
-                        //if LFC file has no revision: copy to SyncedDevice
+                        //if LFCIsRight file has no revision: copy to SyncedDevice
                         logger.info(String.format("<== (new file) / (%s) %s (%s/%s)", s.getEmail(), lfcPath, countFiles, fileLimit));
                         copieFileFromLFCToDevice(s, lfcPath, deleteFilesFromSource, countFiles, q);
                         numberOfFilesTransferredToDevice++;
                         sizeOfFilesTransferredToDevice += q.getValue().getSize();
 
                     } else {
-                        //file has a revision in LFC: it used to be in SyncedDevice but was removed: remove from LFC.
+                        //file has a revision in LFCIsRight: it used to be in SyncedDevice but was removed: remove from LFCIsRight.
                         logger.info(String.format("==x (%s) %s/%s (%s/%s)", s.getEmail(), syncedLFCDir, lfcPath, countFiles, fileLimit));
                         lfcu.deleteFromLFC("/" + lfcPath, s);
                         numberOfFilesDeletedInLFC++;
@@ -296,8 +296,8 @@ public class Synchronizer extends Thread {
                     }
 
                 } else {
-                    if (lfcRev.equals("") && !LFC) { //rev "" means the file is there but has no rev. It was never synced with the SyncedDevice.
-                        //file is in LFC with no rev and it is also in SyncedDevice. Something wrong must have happened. Assumes syncedDevice is right.
+                    if (lfcRev.equals("") && !LFCIsRight) { //rev "" means the file is there but has no rev. It was never synced with the SyncedDevice.
+                        //file is in LFCIsRight with no rev and it is also in SyncedDevice. Something wrong must have happened. Assumes syncedDevice is right.
                         logger.info(String.format("==x> (no revision in LFC) (%s) %s %s (%s/%s)", s.getEmail(), lfcPath, syncedLFCDir, countFiles, fileLimit));
                         lfcu.deleteFromLFC("/" + lfcPath, s);
                         numberOfFilesDeletedInLFC++;
@@ -308,8 +308,8 @@ public class Synchronizer extends Thread {
                         countFiles++;
                     } else {
                         if (!lfcRev.equals(remoteRevision)) {
-                            //revisions disagree: if it's LFC and checkFilesContent so assumes LFC is right
-                            if (LFC) {//discuss check file content
+                            //revisions disagree: if it's LFCIsRight and checkFilesContent so assumes LFCIsRight is right
+                            if (LFCIsRight) {//discuss check file content
                                 //delete file from device 
                                 sd.deleteFile(PathUtils.cleanse(lfcPath));
                                 numberOfFilesDeletedInDevice++;
