@@ -55,7 +55,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -168,7 +167,9 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             while (rs.next()) {
                 String val = rs.getString("validated");
                 Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"), TransferType.valueOf(rs.getString("transferType")),
-                        rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"), rs.getBoolean("deleteFilesFromSource"));
+                        rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"), rs.getBoolean("deleteFilesFromSource"),rs.getBoolean("checkFilesContent"),
+                        rs.getInt("numberOfFilesTransferredToLFC"), rs.getLong("sizeOfFilesTransferredToLFC"), rs.getInt("numberOfFilesTransferredToDevice"), rs.getLong("sizeOfFilesTransferredToDevice"),
+                        rs.getInt("numberOfFilesDeletedInLFC"), rs.getLong("sizeOfFilesDeletedInLFC"), rs.getInt("numberOfFilesDeletedInDevice"), rs.getLong("sizeOfFilesDeletedInDevice"));
                 userAccounts.add(ua);
             }
             ps.close();
@@ -352,4 +353,78 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             throw new SyncException(ex);
         }
     }
+
+    public boolean isCheckFilesContent(Synchronization ua) throws SyncException {
+
+        try {
+
+            PreparedStatement ps2 = connection.prepareStatement("select "
+                    + " checkFilesContent from VIPSSHAccounts "
+                    + "WHERE email = ? and LFCDir=?");
+            ps2.setString(1, ua.getEmail());
+            ps2.setString(2, ua.getSyncedLFCDir());
+            ResultSet rs2 = ps2.executeQuery();
+            boolean checkFilesContent = false;
+            while (rs2.next()) {
+                checkFilesContent = rs2.getBoolean("checkFilesContent");
+            }
+            return checkFilesContent;
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+    }
+
+    public void updateLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, double sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, double sizeOfFilesDeletedInLFC) throws SyncException {
+        try {
+
+            PreparedStatement ps = connection.prepareStatement("UPDATE "
+                    + "VIPSSHAccounts SET "
+                    + "numberOfFilesTransferredToLFC=? "
+                    + ",sizeOfFilesTransferredToLFC=? "
+                    + ",numberOfFilesDeletedInLFC=? "
+                    + ",sizeOfFilesDeletedInLFC=? "
+                    + "WHERE email = ? and LFCDir=?");
+            ps.setInt(1, numberOfFilesTransferredToLFC);
+            ps.setDouble(2, sizeOfFilesTransferredToLFC);
+            ps.setInt(3, numberOfFilesDeletedInLFC);
+            ps.setDouble(4, sizeOfFilesDeletedInLFC);
+            ps.setString(5, ua.getEmail());
+            ps.setString(6, ua.getSyncedLFCDir());
+            ps.executeUpdate();
+            ps.close();
+
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+
+    }
+
+    public void updateDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, double sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, double sizeOfFilesDeletedInDevice) throws SyncException {
+        try {
+
+            PreparedStatement ps = connection.prepareStatement("UPDATE "
+                    + "VIPSSHAccounts SET "
+                    + "numberOfFilesTransferredToDevice=? "
+                    + ",sizeOfFilesTransferredToDevice=? "
+                    + ",numberOfFilesDeletedInDevice=? "
+                    + ",sizeOfFilesDeletedInDevice=? "
+                    + "WHERE email = ? and LFCDir=?");
+            ps.setInt(1, numberOfFilesTransferredToDevice);
+            ps.setDouble(2, sizeOfFilesTransferredToDevice);
+            ps.setInt(3, numberOfFilesDeletedInDevice);
+            ps.setDouble(4, sizeOfFilesDeletedInDevice);
+            ps.setString(5, ua.getEmail());
+            ps.setString(6, ua.getSyncedLFCDir());
+            ps.executeUpdate();
+            ps.close();
+
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+
+    }
+
 }

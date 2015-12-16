@@ -47,7 +47,8 @@ import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 /**
  * Bean object representing an SSH synchronization.
  *
- * @author Tristan Glatard, Nouha Boujelben
+ * @author Tristan Glatard,
+ * @author Nouha Boujelben
  */
 public class SSHSynchronization extends Synchronization {
 
@@ -55,7 +56,6 @@ public class SSHSynchronization extends Synchronization {
     private final String sshHostName;
     private final String sshDirectoryName;
     private final int port;
-   
 
     /**
      *
@@ -69,8 +69,9 @@ public class SSHSynchronization extends Synchronization {
      * @param directoryName
      * @param port
      */
-    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir,TransferType transferType, String userName, String hostName, String directoryName, int port,boolean deleteFilesFromSource) {
-        super(email, validated, authFailed, syncedLFCDir,transferType,deleteFilesFromSource);
+    public SSHSynchronization(String email, boolean validated, boolean authFailed, String syncedLFCDir, TransferType transferType, String userName, String hostName, String directoryName, int port, boolean deleteFilesFromSource,boolean checkFilesContent,
+            int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) {
+        super(email, validated, authFailed, syncedLFCDir, transferType, deleteFilesFromSource,checkFilesContent, numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInLFC, sizeOfFilesDeletedInLFC, numberOfFilesDeletedInDevice, sizeOfFilesDeletedInDevice);
         this.sshUserName = userName;
         this.sshHostName = hostName;
         this.sshDirectoryName = directoryName;

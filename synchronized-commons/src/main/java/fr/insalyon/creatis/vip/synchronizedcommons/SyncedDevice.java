@@ -48,7 +48,8 @@ import java.util.List;
 /**
  * Interface for synchronized devices.
  *
- * @author Tristan Glatard, Nouha Boujelben
+ * @author Tristan Glatard,
+ * @author Nouha Boujelben
  */
 public interface SyncedDevice {
 
@@ -59,7 +60,7 @@ public interface SyncedDevice {
      * @return
      * @throws SyncException
      */
-    public HashMap<String, String> listFiles(String remoteDir) throws SyncException;
+    public HashMap<String, FileProperties> listFiles(String remoteDir, Synchronization synchronization) throws SyncException;
 
     /**
      * Copies a remote file to a local directory.
@@ -126,7 +127,7 @@ public interface SyncedDevice {
      * @return
      * @throws SyncException
      */
-    public String getRevision(String remoteFile) throws SyncException;
+    public String getRevision(String remoteFile, Synchronization synchronization) throws SyncException;
 
     /**
      * Sets the synchronization to use.
@@ -184,5 +185,9 @@ public interface SyncedDevice {
      * @return The slot time used for the exponential back-off algorithm
      */
     public double getNbSecondFromConfigFile() throws SyncException;
+
+    public void updateLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, double sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, double sizeOfFilesDeletedInLFC) throws SyncException;
+
+    public void updateDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, double sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, double sizeOfFilesDeletedInDevice) throws SyncException;
 
 }
