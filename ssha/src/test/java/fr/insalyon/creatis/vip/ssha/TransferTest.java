@@ -63,12 +63,10 @@ public class TransferTest {
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    // transferFilesFromLFCToSynchDevice without deleting file from source 
-    @Test
-    public void transferFilesFromLFCToSynchDevice() throws SyncException  {
+    //@Test
+    public void transferFilesFromLFCToSynchDevice() throws SyncException {
         System.out.println("transferFilesFromLFCToSynchDevice");
-        ///thrown.expect(SyncException.class);
-        int fileWithSameName = 0;    
+        int fileWithSameName = 0;
         ua = (SSHSynchronization) getSynchronization("nouha.boujelben@creatis.insa-lyon.fr", "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
         sshd.setSynchronization(ua);
         HashMap<String, FileProperties> lfcFiles = s.getLfcu().listLFCDir("/", ua);
@@ -79,70 +77,67 @@ public class TransferTest {
                 fileWithSameName++;
             }
         }
-        int files = lfcFiles.size() + sshFiles.size();
         String syncedLFCDir = ua.getSyncedLFCDir();
-        sshd.updateDeviceMonitoringParams(ua, 0, 0, 0, 0);
-        sshd.updateLFCMonitoringParams(ua, 0, 0, 0, 0);
-        s.transferFilesFromLFCToSynchDevice(ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, true);
-        HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
+        resetLFCAndDeviceMonitorParams(sshd, ua);
+        s.transferFilesFromLFCToSynchDevice(ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
         //assert equal 
-        //without the same name
-        //assertEquals(expSshFiles.size(), lfcFiles.size() + sshFiles.size()-fileWithSameName);
-        assertEquals(0, 0);
-        // TODO review the generated test code and remove the default call to fail.
-        //throw new SyncException("The test case  transferFilesFromLFCToSynchDevice failed");
+        assertEquals(expSshFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
     }
 
-    /**
-     * Test of ignorePath method, of class Synchronizer.
-     */
     //@Test
     public void transferFilesFromSynchDeviceToLFC() throws SyncException {
-        System.out.println("transferFilesFromLFCToSynchDevice");
-        thrown.expect(SyncException.class);
-        ua = (SSHSynchronization) getSynchronization("nouha.boujelben@creatis.insa-lyon.fr", "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh");
+        System.out.println("transferFilesFromSynchDeviceToLFC");
+        int fileWithSameName = 0;
+        ua = (SSHSynchronization) getSynchronization("nouha.boujelben@creatis.insa-lyon.fr", "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
+        sshd.setSynchronization(ua);
         HashMap<String, FileProperties> lfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> sshFiles = sshd.listFiles("/", ua);
-        int files = lfcFiles.size() + sshFiles.size();
+        for (Map.Entry<String, FileProperties> p : sshFiles.entrySet()) {
+            String sshPath = PathUtils.cleanse(p.getKey());
+            if (lfcFiles.get(sshPath) != null) {
+                fileWithSameName++;
+            }
+        }
+
         String syncedLFCDir = ua.getSyncedLFCDir();
-        sshd.updateDeviceMonitoringParams(ua, 0, 0, 0, 0);
-        sshd.updateLFCMonitoringParams(ua, 0, 0, 0, 0);
-
+        resetLFCAndDeviceMonitorParams(sshd, ua);
         int countFiles = 0;
-        s.transferFilesFromSynchDeviceToLFC(ua, sshd, sshFiles, lfcFiles, countFiles, countFiles, countFiles, countFiles, syncedLFCDir, true);
+        s.transferFilesFromSynchDeviceToLFC(ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, true);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
-        HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
-        int expFiles = expLfcFiles.size() + expLfcFiles.size();
+        assertEquals(expLfcFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
 
-        assertEquals(expFiles, files);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case  transferFilesFromLFCToSynchDevice failed.");
     }
 
-    //@Test
+    @Test
     public void synchronization() throws SyncException {
         System.out.println("transferFilesFromSynchDeviceToLFC");
-        thrown.expect(SyncException.class);
-        ua = (SSHSynchronization) getSynchronization("nouha.boujelben@creatis.insa-lyon.fr", "/grid/biomed/creatis/vip/data/users/nouha_boujelben/kk_ssh");
+        int filesWithSameName = 0;
+        ua = (SSHSynchronization) getSynchronization("nouha.boujelben@creatis.insa-lyon.fr", "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
+        sshd.setSynchronization(ua);
         HashMap<String, FileProperties> lfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> sshFiles = sshd.listFiles("/", ua);
-
-        int files = lfcFiles.size() + sshFiles.size();
+        for (Map.Entry<String, FileProperties> p : sshFiles.entrySet()) {
+            String sshPath = PathUtils.cleanse(p.getKey());
+            if (lfcFiles.get(sshPath) != null) {
+                filesWithSameName++;
+            }
+        }
         String syncedLFCDir = ua.getSyncedLFCDir();
-        sshd.updateDeviceMonitoringParams(ua, 0, 0, 0, 0);
-        sshd.updateLFCMonitoringParams(ua, 0, 0, 0, 0);
+        resetLFCAndDeviceMonitorParams(sshd, ua);
 
         int countFiles = 0;
-        s.transferFilesFromSynchDeviceToLFC(ua, sshd, sshFiles, lfcFiles, countFiles, countFiles, countFiles, countFiles, syncedLFCDir, true);
+        //SyncedDevice -> LFC
+        s.transferFilesFromSynchDeviceToLFC(ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, false);
+        //LFC -> SyncedDevice
+        LFCMonitorParams lFCMonitorParams = getLFCMonitorParams(ua.getEmail(), "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
+
+        s.transferFilesFromLFCToSynchDevice(ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), lFCMonitorParams.getNumberOfFilesDeletedInLFC(), lFCMonitorParams.getSizeOfFilesDeletedInLFC(), lFCMonitorParams.getNumberOfFilesTransferredToLFC(), lFCMonitorParams.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, false);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
-        int expFiles = expLfcFiles.size() + expLfcFiles.size();
-        boolean expResult = false;
 
-        assertEquals(expFiles, files);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case  transferFilesFromLFCToSynchDevice failed.");
+        assertEquals(expLfcFiles.size(), expSshFiles.size());
+
     }
 
     private Synchronization getSynchronization(String email, String lfcDir) throws SyncException {
@@ -165,6 +160,44 @@ public class TransferTest {
             }
             ps.close();
             return sSHSynchronization;
+        } catch (SQLException ex) {
+            throw new SyncException(ex);
+        }
+
+    }
+
+    private void resetLFCAndDeviceMonitorParams(SSHDevice sshd, SSHSynchronization ua) throws SyncException {
+        sshd.updateDeviceMonitoringParams(ua, 0, 0, 0, 0);
+        ua.setNumberOfFilesTransferredToDevice(0);
+        ua.setSizeOfFilesTransferredToDevice(0);
+        ua.setNumberOfFilesDeletedInDevice(0);
+        ua.setSizeOfFilesDeletedInDevice(0);
+        sshd.updateLFCMonitoringParams(ua, 0, 0, 0, 0);
+        ua.setNumberOfFilesTransferredToLFC(0);
+        ua.setSizeOfFilesTransferredToLFC(0);
+        ua.setNumberOfFilesDeletedInLFC(0);
+        ua.setSizeOfFilesDeletedInLFC(0);
+
+    }
+
+    private LFCMonitorParams getLFCMonitorParams(String email, String lfcDir) throws SyncException {
+        try {
+            PreparedStatement ps = SSHMySQLDAO.getInstance(ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword()).getConnection().prepareStatement("SELECT "
+                    + " * "
+                    + "FROM VIPSSHAccounts where email=? and LFCDir=? ");
+            ps.setString(1, email);
+            ps.setString(2, lfcDir);
+            ResultSet rs = ps.executeQuery();
+            LFCMonitorParams lFCMonitorParams = null;
+            while (rs.next()) {
+
+                lFCMonitorParams = new LFCMonitorParams(
+                        rs.getInt("numberOfFilesTransferredToLFC"), rs.getLong("sizeOfFilesTransferredToLFC"),
+                        rs.getInt("numberOfFilesDeletedInLFC"), rs.getLong("sizeOfFilesDeletedInLFC"));
+
+            }
+            ps.close();
+            return lFCMonitorParams;
         } catch (SQLException ex) {
             throw new SyncException(ex);
         }
