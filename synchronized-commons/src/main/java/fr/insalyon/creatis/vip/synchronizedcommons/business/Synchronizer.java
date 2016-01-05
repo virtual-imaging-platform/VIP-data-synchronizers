@@ -239,7 +239,7 @@ public class Synchronizer extends Thread {
 
     }
 
-    private void transferFilesFromSynchDeviceToLFC(Synchronization s, SyncedDevice sd, HashMap<String, FileProperties> remoteFiles, HashMap<String, FileProperties> lfcFiles, int numberOfFilesTransferredToLFC, double sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, double sizeOfFilesDeletedInLFC, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
+    public void transferFilesFromSynchDeviceToLFC(Synchronization s, SyncedDevice sd, HashMap<String, FileProperties> remoteFiles, HashMap<String, FileProperties> lfcFiles, int numberOfFilesTransferredToLFC, double sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, double sizeOfFilesDeletedInLFC, String syncedLFCDir, boolean deleteFilesFromSource) throws SyncException {
 
         for (Map.Entry<String, FileProperties> p : remoteFiles.entrySet()) {
             if (numberOfFilesTransferredToLFC < fileLimit) {
@@ -297,7 +297,7 @@ public class Synchronizer extends Thread {
 
     }
 
-    private void transferFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, FileProperties> remoteFiles, HashMap<String, FileProperties> lfcFiles,
+    public void transferFilesFromLFCToSynchDevice(Synchronization s, HashMap<String, FileProperties> remoteFiles, HashMap<String, FileProperties> lfcFiles,
             int countFiles, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC,
             int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice, String syncedLFCDir, boolean deleteFilesFromSource, boolean checkFilesContent, boolean LFCIsRight) throws SyncException {
 
@@ -314,21 +314,23 @@ public class Synchronizer extends Thread {
                 }
 
                 if (remoteRevision == null) {
-                    //file is in LFCIsRight but not in SyncedDevice
-                    if (lfcRev.equals("")) {
-                        //if LFCIsRight file has no revision: copy to SyncedDevice
+                    //file is in LFC but not in SyncedDevice
+                    if (lfcRev.equals("") || LFCIsRight) {
+                        //if LFC file has no revision: copy to SyncedDevice
                         logger.info(String.format("<== (new file) / (%s) %s (%s/%s)", s.getEmail(), lfcPath, countFiles, fileLimit));
                         copieFileFromLFCToDevice(s, lfcPath, deleteFilesFromSource, countFiles, q);
                         numberOfFilesTransferredToDevice++;
                         sizeOfFilesTransferredToDevice += q.getValue().getSize();
 
                     } else {
-                        //file has a revision in LFCIsRight: it used to be in SyncedDevice but was removed: remove from LFCIsRight.
-                        logger.info(String.format("==x (%s) %s/%s (%s/%s)", s.getEmail(), syncedLFCDir, lfcPath, countFiles, fileLimit));
-                        lfcu.deleteFromLFC("/" + lfcPath, s);
-                        numberOfFilesDeletedInLFC++;
-                        sizeOfFilesDeletedInLFC += q.getValue().getSize();
-                        countFiles++;
+                        if (!LFCIsRight) {
+                            //file has a revision in LFC: it used to be in SyncedDevice but was removed: remove from LFCIsRight.
+                            logger.info(String.format("==x (%s) %s/%s (%s/%s)", s.getEmail(), syncedLFCDir, lfcPath, countFiles, fileLimit));
+                            lfcu.deleteFromLFC("/" + lfcPath, s);
+                            numberOfFilesDeletedInLFC++;
+                            sizeOfFilesDeletedInLFC += q.getValue().getSize();
+                            countFiles++;
+                        }
                     }
 
                 } else {
@@ -345,7 +347,7 @@ public class Synchronizer extends Thread {
                     } else {
                         if (!lfcRev.equals(remoteRevision)) {
                             //revisions disagree: if it's LFCIsRight and checkFilesContent so assumes LFCIsRight is right
-                            if (LFCIsRight) {//discuss check file content
+                            if (LFCIsRight) {//
                                 //delete file from device 
                                 sd.deleteFile(PathUtils.cleanse(lfcPath));
                                 numberOfFilesDeletedInDevice++;
@@ -390,6 +392,10 @@ public class Synchronizer extends Thread {
         }
         countFiles++;
 
+    }
+
+    public LFCUtils getLfcu() {
+        return lfcu;
     }
 
 }
