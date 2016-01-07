@@ -71,6 +71,21 @@ import org.junit.rules.ExpectedException;
  *
  * @author Nouha Boujelben
  */
+/**
+ * To test the synchronization in your machine you have to: 1)Active the sshd
+ * server (sudo service sshd start) 2)Create a database for test: **local
+ * database :you can run the class DataBaseTest and DataBaseOperations to create
+ * a local database **remote database(remote MYSQL server) for test you have to
+ * create an ssh tunnel for the mysql server: ssh -L [LOCAL
+ * PORT]:localhost:[REMOTE PORT] [USERNAME]@[SSH_SERVER] -f -N (option -f -N to
+ * force ssh to go to background without running a particular command on the
+ * remote server) 3)SSH TUNNEL FOR GRIDA(grida port and grida host are
+ * configured in the ssha config file) ssh -L [LOCALPORT]:localhost:[GRIDA PORT]
+ * [USER NAME]@[GRIDA SERVER] -f -N use SSHFS to mount a temporary local
+ * directory (specified in the ssha config file) with a directory in grida
+ * server these two directories have to take the some path and name sshfs
+ * [USERNAME]@[SSH REMOTE SERVER]:[REMOTE DIR] [LOCAL DIR] -o nonempty
+ */
 public class TransferTest {
 
     static SSHDevice sshd;
