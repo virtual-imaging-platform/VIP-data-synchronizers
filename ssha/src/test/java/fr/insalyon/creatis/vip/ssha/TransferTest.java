@@ -1,7 +1,42 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ Copyright 2015
+
+ CREATIS
+ CNRS UMR 5220 -- INSERM U1044 -- Université Lyon 1 -- INSA Lyon
+
+ Authors
+
+ Nouha Boujelben (nouha.boujelben@creatis.insa-lyon.fr)
+ Tristan Glatard (tristan.glatard@creatis.insa-lyon.fr)
+
+ This software is a daemon for file synchronization between SFTP
+ servers and the LCG File Catalog (LFC).
+
+ This software is governed by the CeCILL-B license under French law and
+ abiding by the rules of distribution of free software.  You can use,
+ modify and/ or redistribute the software under the terms of the
+ CeCILL-B license as circulated by CEA, CNRS and INRIA at the following
+ URL "http://www.cecill.info".
+
+ As a counterpart to the access to the source code and rights to copy,
+ modify and redistribute granted by the license, users are provided
+ only with a limited warranty and the software's author, the holder of
+ the economic rights, and the successive licensors have only limited
+ liability.
+
+ In this respect, the user's attention is drawn to the risks associated
+ with loading, using, modifying and/or developing or reproducing the
+ software by the user in light of its specific status of free software,
+ that may mean that it is complicated to manipulate, and that also
+ therefore means that it is reserved for developers and experienced
+ professionals having in-depth computer knowledge. Users are therefore
+ encouraged to load and test the software's suitability as regards
+ their requirements in conditions enabling the security of their
+ systems and/or data to be ensured and, more generally, to use and
+ operate it in the same conditions as regards security.
+
+ The fact that you are presently reading this means that you have had
+ knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.insalyon.creatis.vip.ssha;
 
@@ -12,6 +47,8 @@ import fr.insalyon.creatis.vip.synchronizedcommons.TransferType;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.PathUtils;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.Synchronizer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +56,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -63,7 +102,7 @@ public class TransferTest {
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    //@Test
+    @Test
     public void transferFilesFromLFCToSynchDevice() throws SyncException {
         System.out.println("transferFilesFromLFCToSynchDevice");
         int fileWithSameName = 0;
@@ -79,7 +118,45 @@ public class TransferTest {
         }
         String syncedLFCDir = ua.getSyncedLFCDir();
         resetLFCAndDeviceMonitorParams(sshd, ua);
-        s.transferFilesFromLFCToSynchDevice(ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
+        final Class table[] = new Class[16];
+        table[0] = Synchronization.class;
+        table[1] = HashMap.class;
+        table[2] = HashMap.class;
+        table[3] = Integer.TYPE;
+        table[4] = Integer.TYPE;
+        table[5] = Long.TYPE;
+        table[6] = Integer.TYPE;
+        table[7] = Long.TYPE;
+        table[8] = Integer.TYPE;
+        table[9] = Long.TYPE;
+        table[10] = Integer.TYPE;
+        table[11] = Long.TYPE;
+        table[12] = String.class;
+        table[13] = Boolean.TYPE;
+        table[14] = Boolean.TYPE;
+        table[15] = Boolean.TYPE;
+        try {
+            Method method = s.getClass().getDeclaredMethod("transferFilesFromLFCToSynchDevice", table);
+            method.setAccessible(true);
+
+            method.invoke(s, ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
+        } catch (IllegalAccessException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        } catch (InvocationTargetException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        } catch (NoSuchMethodException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        } catch (SecurityException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        }
+        //methodReflection(s, "transferFilesFromLFCToSynchDevice",ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
         //assert equal 
         assertEquals(expSshFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
@@ -103,13 +180,13 @@ public class TransferTest {
         String syncedLFCDir = ua.getSyncedLFCDir();
         resetLFCAndDeviceMonitorParams(sshd, ua);
         int countFiles = 0;
-        s.transferFilesFromSynchDeviceToLFC(ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, true);
+        //methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, true);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         assertEquals(expLfcFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
 
     }
 
-    @Test
+    //@Test
     public void synchronization() throws SyncException {
         System.out.println("transferFilesFromSynchDeviceToLFC");
         int filesWithSameName = 0;
@@ -128,11 +205,10 @@ public class TransferTest {
 
         int countFiles = 0;
         //SyncedDevice -> LFC
-        s.transferFilesFromSynchDeviceToLFC(ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, false);
+        //  methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, false);
         //LFC -> SyncedDevice
         LFCMonitorParams lFCMonitorParams = getLFCMonitorParams(ua.getEmail(), "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
-
-        s.transferFilesFromLFCToSynchDevice(ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), lFCMonitorParams.getNumberOfFilesDeletedInLFC(), lFCMonitorParams.getSizeOfFilesDeletedInLFC(), lFCMonitorParams.getNumberOfFilesTransferredToLFC(), lFCMonitorParams.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, false);
+        //methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), lFCMonitorParams.getNumberOfFilesDeletedInLFC(), lFCMonitorParams.getSizeOfFilesDeletedInLFC(), lFCMonitorParams.getNumberOfFilesTransferredToLFC(), lFCMonitorParams.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, false);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
 
@@ -203,5 +279,39 @@ public class TransferTest {
         }
 
     }
+/**
+    private void methodReflection(Synchronizer s, String methodName,
+            Object... args) {
+        final Class table[] = new Class[args.length];
+        int i
+                = 0;
+        for (Object obj : args) {
+            if obj.getClass()
+            table[i] = obj.getClass();
+            System.out.println(table[i]);
+            i++;
+        }
+        Method method = null;
+        try {
+            method
+                    = s.getClass().getDeclaredMethod(methodName, table);
+        } catch (NoSuchMethodException ex) {
+            System.out.println(ex);
+        } catch (SecurityException ex) {
+            System.out.println(ex);
+        }
+        method.setAccessible(true);
+        try {
+            method.invoke(s, args);
+        } catch (IllegalAccessException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            System.out.println(ex.getMessage());
+        } catch (InvocationTargetException ex) {
+            System.out.println(ex.getMessage());
+
+        }
+    }
+    **/
 
 }
