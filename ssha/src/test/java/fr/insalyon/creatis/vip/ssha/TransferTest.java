@@ -118,51 +118,13 @@ public class TransferTest {
         }
         String syncedLFCDir = ua.getSyncedLFCDir();
         resetLFCAndDeviceMonitorParams(sshd, ua);
-        final Class table[] = new Class[16];
-        table[0] = Synchronization.class;
-        table[1] = HashMap.class;
-        table[2] = HashMap.class;
-        table[3] = Integer.TYPE;
-        table[4] = Integer.TYPE;
-        table[5] = Long.TYPE;
-        table[6] = Integer.TYPE;
-        table[7] = Long.TYPE;
-        table[8] = Integer.TYPE;
-        table[9] = Long.TYPE;
-        table[10] = Integer.TYPE;
-        table[11] = Long.TYPE;
-        table[12] = String.class;
-        table[13] = Boolean.TYPE;
-        table[14] = Boolean.TYPE;
-        table[15] = Boolean.TYPE;
-        try {
-            Method method = s.getClass().getDeclaredMethod("transferFilesFromLFCToSynchDevice", table);
-            method.setAccessible(true);
-
-            method.invoke(s, ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
-        } catch (IllegalAccessException ex) {
-            ex.getCause().printStackTrace();
-            throw new SyncException(ex.getMessage());
-        } catch (IllegalArgumentException ex) {
-            ex.getCause().printStackTrace();
-            throw new SyncException(ex.getMessage());
-        } catch (InvocationTargetException ex) {
-            ex.getCause().printStackTrace();
-            throw new SyncException(ex.getMessage());
-        } catch (NoSuchMethodException ex) {
-            ex.getCause().printStackTrace();
-            throw new SyncException(ex.getMessage());
-        } catch (SecurityException ex) {
-            ex.getCause().printStackTrace();
-            throw new SyncException(ex.getMessage());
-        }
-        //methodReflection(s, "transferFilesFromLFCToSynchDevice",ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
+        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
         //assert equal 
         assertEquals(expSshFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
     }
 
-    //@Test
+    //  @Test
     public void transferFilesFromSynchDeviceToLFC() throws SyncException {
         System.out.println("transferFilesFromSynchDeviceToLFC");
         int fileWithSameName = 0;
@@ -180,7 +142,7 @@ public class TransferTest {
         String syncedLFCDir = ua.getSyncedLFCDir();
         resetLFCAndDeviceMonitorParams(sshd, ua);
         int countFiles = 0;
-        //methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, true);
+        methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, true);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         assertEquals(expLfcFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
 
@@ -205,10 +167,10 @@ public class TransferTest {
 
         int countFiles = 0;
         //SyncedDevice -> LFC
-        //  methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, false);
+        methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, false);
         //LFC -> SyncedDevice
         LFCMonitorParams lFCMonitorParams = getLFCMonitorParams(ua.getEmail(), "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
-        //methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), lFCMonitorParams.getNumberOfFilesDeletedInLFC(), lFCMonitorParams.getSizeOfFilesDeletedInLFC(), lFCMonitorParams.getNumberOfFilesTransferredToLFC(), lFCMonitorParams.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, false);
+        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), lFCMonitorParams.getNumberOfFilesDeletedInLFC(), lFCMonitorParams.getSizeOfFilesDeletedInLFC(), lFCMonitorParams.getNumberOfFilesTransferredToLFC(), lFCMonitorParams.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, false);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
 
@@ -279,39 +241,45 @@ public class TransferTest {
         }
 
     }
-/**
+
     private void methodReflection(Synchronizer s, String methodName,
-            Object... args) {
+            Object... args) throws SyncException {
         final Class table[] = new Class[args.length];
-        int i
-                = 0;
+        int i = 0;
         for (Object obj : args) {
-            if obj.getClass()
-            table[i] = obj.getClass();
-            System.out.println(table[i]);
+            if (obj instanceof java.lang.Integer) {
+                table[i] = Integer.TYPE;
+            } else if (obj instanceof java.lang.Long) {
+                table[i] = Long.TYPE;
+            } else if (obj instanceof java.lang.Boolean) {
+                table[i] = Boolean.TYPE;
+            } else if (obj instanceof Synchronization) {
+                table[i] = Synchronization.class;
+            } else {
+                table[i] = obj.getClass();
+            }
             i++;
         }
-        Method method = null;
         try {
-            method
-                    = s.getClass().getDeclaredMethod(methodName, table);
-        } catch (NoSuchMethodException ex) {
-            System.out.println(ex);
-        } catch (SecurityException ex) {
-            System.out.println(ex);
-        }
-        method.setAccessible(true);
-        try {
+            Method method = s.getClass().getDeclaredMethod(methodName, table);
+            method.setAccessible(true);
             method.invoke(s, args);
         } catch (IllegalAccessException ex) {
-            System.out.println(ex.getMessage());
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            System.out.println(ex.getMessage());
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
         } catch (InvocationTargetException ex) {
-            System.out.println(ex.getMessage());
-
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        } catch (NoSuchMethodException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
+        } catch (SecurityException ex) {
+            ex.getCause().printStackTrace();
+            throw new SyncException(ex.getMessage());
         }
     }
-    **/
 
 }
