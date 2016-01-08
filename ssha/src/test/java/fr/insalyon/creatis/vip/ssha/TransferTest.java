@@ -52,12 +52,8 @@ import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -133,7 +129,7 @@ public class TransferTest {
         }
         String syncedLFCDir = ua.getSyncedLFCDir();
         resetLFCAndDeviceMonitorParams(sshd, ua);
-        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, true, true, true);
+        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, syncedLFCDir, true, true);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
         //assert equal 
         assertEquals(expSshFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
@@ -157,7 +153,7 @@ public class TransferTest {
         String syncedLFCDir = ua.getSyncedLFCDir();
         resetLFCAndDeviceMonitorParams(sshd, ua);
         int countFiles = 0;
-        methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, true);
+        methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, syncedLFCDir, true);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         assertEquals(expLfcFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
 
@@ -182,10 +178,10 @@ public class TransferTest {
 
         int countFiles = 0;
         //SyncedDevice -> LFC
-        methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, ua.getNumberOfFilesTransferredToLFC(), ua.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInLFC(), ua.getSizeOfFilesDeletedInLFC(), syncedLFCDir, false);
+        methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, syncedLFCDir, false);
         //LFC -> SyncedDevice
         LFCMonitorParams lFCMonitorParams = getLFCMonitorParams(ua.getEmail(), "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
-        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, ua.getNumberOfFilesTransferredToDevice(), ua.getSizeOfFilesTransferredToDevice(), lFCMonitorParams.getNumberOfFilesDeletedInLFC(), lFCMonitorParams.getSizeOfFilesDeletedInLFC(), lFCMonitorParams.getNumberOfFilesTransferredToLFC(), lFCMonitorParams.getSizeOfFilesTransferredToLFC(), ua.getNumberOfFilesDeletedInDevice(), ua.getSizeOfFilesDeletedInDevice(), syncedLFCDir, false, true, false);
+        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, syncedLFCDir, false, false);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
 
