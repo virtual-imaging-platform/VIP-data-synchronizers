@@ -405,12 +405,12 @@ public class SSHDevice implements SyncedDevice {
 
     @Override
     public void updateLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC) throws SyncException {
-        SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateLFCMonitoringParams(ua, numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesDeletedInLFC, sizeOfFilesDeletedInLFC);
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).increaseLFCMonitoringParams(ua, numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesDeletedInLFC, sizeOfFilesDeletedInLFC);
     }
 
     @Override
     public void updateDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) throws SyncException {
-        SSHMySQLDAO.getInstance(jdbcUrl, username, password).updateDeviceMonitoringParams(ua, numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInDevice, sizeOfFilesDeletedInDevice);
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).increaseDeviceMonitoringParams(ua, numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInDevice, sizeOfFilesDeletedInDevice);
     }
 
 }

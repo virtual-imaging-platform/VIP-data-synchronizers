@@ -374,7 +374,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
         }
     }
 
-    public void updateLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC) throws SyncException {
+    public void increaseLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC) throws SyncException {
         try {
             PreparedStatement ps2 = connection.prepareStatement("select "
                     + "numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesDeletedInLFC, "
@@ -417,7 +417,7 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
 
     }
 
-    public void updateDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) throws SyncException {
+    public void increaseDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) throws SyncException {
         try {
 
             PreparedStatement ps2 = connection.prepareStatement("select "

@@ -113,7 +113,7 @@ public class TransferTest {
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    @Test
+    //@Test
     public void transferFilesFromLFCToSynchDevice() throws SyncException {
         System.out.println("transferFilesFromLFCToSynchDevice");
         int fileWithSameName = 0;
@@ -128,14 +128,13 @@ public class TransferTest {
             }
         }
         String syncedLFCDir = ua.getSyncedLFCDir();
-        resetLFCAndDeviceMonitorParams(sshd, ua);
-        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, syncedLFCDir, true, true);
+        methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, syncedLFCDir, ua.getDeleteFilesfromSource(), true);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
         //assert equal 
         assertEquals(expSshFiles.size(), lfcFiles.size() + sshFiles.size() - fileWithSameName);
     }
 
-    //  @Test
+    // @Test
     public void transferFilesFromSynchDeviceToLFC() throws SyncException {
         System.out.println("transferFilesFromSynchDeviceToLFC");
         int fileWithSameName = 0;
@@ -151,7 +150,6 @@ public class TransferTest {
         }
 
         String syncedLFCDir = ua.getSyncedLFCDir();
-        resetLFCAndDeviceMonitorParams(sshd, ua);
         int countFiles = 0;
         methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, syncedLFCDir, true);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
@@ -159,7 +157,7 @@ public class TransferTest {
 
     }
 
-    //@Test
+    @Test
     public void synchronization() throws SyncException {
         System.out.println("transferFilesFromSynchDeviceToLFC");
         int filesWithSameName = 0;
@@ -174,13 +172,11 @@ public class TransferTest {
             }
         }
         String syncedLFCDir = ua.getSyncedLFCDir();
-        resetLFCAndDeviceMonitorParams(sshd, ua);
 
         int countFiles = 0;
         //SyncedDevice -> LFC
         methodReflection(s, "transferFilesFromSynchDeviceToLFC", ua, sshd, sshFiles, lfcFiles, syncedLFCDir, false);
         //LFC -> SyncedDevice
-        LFCMonitorParams lFCMonitorParams = getLFCMonitorParams(ua.getEmail(), "/grid/biomed/creatis/vip/data/users/nouha_boujelben/NOUHA4_ssh");
         methodReflection(s, "transferFilesFromLFCToSynchDevice", ua, sshFiles, lfcFiles, 0, syncedLFCDir, false, false);
         HashMap<String, FileProperties> expLfcFiles = s.getLfcu().listLFCDir("/", ua);
         HashMap<String, FileProperties> expSshFiles = sshd.listFiles("/", ua);
@@ -215,44 +211,6 @@ public class TransferTest {
 
     }
 
-    private void resetLFCAndDeviceMonitorParams(SSHDevice sshd, SSHSynchronization ua) throws SyncException {
-        sshd.updateDeviceMonitoringParams(ua, 0, 0, 0, 0);
-        ua.setNumberOfFilesTransferredToDevice(0);
-        ua.setSizeOfFilesTransferredToDevice(0);
-        ua.setNumberOfFilesDeletedInDevice(0);
-        ua.setSizeOfFilesDeletedInDevice(0);
-        sshd.updateLFCMonitoringParams(ua, 0, 0, 0, 0);
-        ua.setNumberOfFilesTransferredToLFC(0);
-        ua.setSizeOfFilesTransferredToLFC(0);
-        ua.setNumberOfFilesDeletedInLFC(0);
-        ua.setSizeOfFilesDeletedInLFC(0);
-
-    }
-
-    private LFCMonitorParams getLFCMonitorParams(String email, String lfcDir) throws SyncException {
-        try {
-            PreparedStatement ps = SSHMySQLDAO.getInstance(ConfigFile.getInstance().getUrl(), ConfigFile.getInstance().getUserName(), ConfigFile.getInstance().getPassword()).getConnection().prepareStatement("SELECT "
-                    + " * "
-                    + "FROM VIPSSHAccounts where email=? and LFCDir=? ");
-            ps.setString(1, email);
-            ps.setString(2, lfcDir);
-            ResultSet rs = ps.executeQuery();
-            LFCMonitorParams lFCMonitorParams = null;
-            while (rs.next()) {
-
-                lFCMonitorParams = new LFCMonitorParams(
-                        rs.getInt("numberOfFilesTransferredToLFC"), rs.getLong("sizeOfFilesTransferredToLFC"),
-                        rs.getInt("numberOfFilesDeletedInLFC"), rs.getLong("sizeOfFilesDeletedInLFC"));
-
-            }
-            ps.close();
-            return lFCMonitorParams;
-        } catch (SQLException ex) {
-            throw new SyncException(ex);
-        }
-
-    }
-
     private void methodReflection(Synchronizer s, String methodName,
             Object... args) throws SyncException {
         final Class table[] = new Class[args.length];
@@ -266,6 +224,8 @@ public class TransferTest {
                 table[i] = Boolean.TYPE;
             } else if (obj instanceof Synchronization) {
                 table[i] = Synchronization.class;
+            } else if (obj instanceof SSHDevice) {
+                table[i] = SyncedDevice.class;
             } else {
                 table[i] = obj.getClass();
             }
@@ -276,7 +236,6 @@ public class TransferTest {
             method.setAccessible(true);
             method.invoke(s, args);
         } catch (IllegalAccessException ex) {
-            ex.getCause().printStackTrace();
             throw new SyncException(ex.getMessage());
         } catch (IllegalArgumentException ex) {
             ex.getCause().printStackTrace();
