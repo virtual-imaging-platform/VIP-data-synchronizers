@@ -139,20 +139,6 @@ public class LFCUtils {
     }
 
     /**
-     * Get size of file in the LFC.
-     *
-     * @param lfn the lfn of the file
-     * @throws SyncException
-     */
-    public String getFileSize(String lfn) throws SyncException {
-        try {
-            return gc.getFileSize(lfn);
-        } catch (GRIDAClientException ex) {
-            throw new SyncException(ex);
-        }
-    }
-
-    /**
      * Copies a local file to the LFC
      *
      * @param localPath
