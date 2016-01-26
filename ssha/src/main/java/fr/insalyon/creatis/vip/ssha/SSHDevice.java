@@ -1,9 +1,46 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ Copyright 2015
+
+ CREATIS
+ CNRS UMR 5220 -- INSERM U1044 -- Université Lyon 1 -- INSA Lyon
+
+ Authors
+
+ Nouha Boujelben (nouha.boujelben@creatis.insa-lyon.fr)
+ Tristan Glatard (tristan.glatard@creatis.insa-lyon.fr)
+
+ This software is a daemon for file synchronization between SFTP
+ servers and the LCG File Catalog (LFC).
+
+ This software is governed by the CeCILL-B license under French law and
+ abiding by the rules of distribution of free software.  You can use,
+ modify and/ or redistribute the software under the terms of the
+ CeCILL-B license as circulated by CEA, CNRS and INRIA at the following
+ URL "http://www.cecill.info".
+
+ As a counterpart to the access to the source code and rights to copy,
+ modify and redistribute granted by the license, users are provided
+ only with a limited warranty and the software's author, the holder of
+ the economic rights, and the successive licensors have only limited
+ liability.
+
+ In this respect, the user's attention is drawn to the risks associated
+ with loading, using, modifying and/or developing or reproducing the
+ software by the user in light of its specific status of free software,
+ that may mean that it is complicated to manipulate, and that also
+ therefore means that it is reserved for developers and experienced
+ professionals having in-depth computer knowledge. Users are therefore
+ encouraged to load and test the software's suitability as regards
+ their requirements in conditions enabling the security of their
+ systems and/or data to be ensured and, more generally, to use and
+ operate it in the same conditions as regards security.
+
+ The fact that you are presently reading this means that you have had
+ knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.insalyon.creatis.vip.ssha;
 
+import fr.insalyon.creatis.vip.synchronizedcommons.FileProperties;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -14,8 +51,11 @@ import com.jcraft.jsch.SftpException;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDevice;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -90,16 +130,25 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public HashMap<String, String> listFiles(String dir) throws SyncException {
+    public HashMap<String, FileProperties> listFiles(String dir, Synchronization synchronization) throws SyncException {
         connect();
         try {
-            HashMap<String, String> map = new HashMap<String, String>();
-            for (String s : sendCommand("for i in `find " + remoteDir + "/" + dir + " -type f`; do echo -n $i\" ; \"; (md5sum $i 2>/dev/null || echo error) | awk '{print $1}'; done").split("\n")) {
+            HashMap<String, FileProperties> map = new HashMap<String, FileProperties>();
+            String command;
+            //this command return consecutively name, size of files and 0.
+            String commandNotCheckFileContent = "find " + remoteDir + "/" + dir + " -type f -printf \"%p; %s; 0\\n\"";
+            //this command return consecutively name, size and md5sum of files
+            String commandMd5sum = "find " + remoteDir + "/" + dir + " -type f  -printf \"%p;%s;\" -exec md5sum {} \\; | awk '{$(NF--)=\"\"; print}'";
+            if (SSHMySQLDAO.getInstance(jdbcUrl, username, password).isCheckFilesContent(synchronization)) {
+                command = commandMd5sum;
+            } else {
+                command = commandNotCheckFileContent;
+            }
+            for (String s : sendCommand(command).split("\n")) {
                 if (!s.equals("")) {
-                    if (s.split(";").length != 2) {
-                        throw new SyncException("Wrong file list: " + s);
-                    }
-                    map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), s.split(";")[1].trim());
+                    //add revision the size of file in this List
+                    map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), new FileProperties(Long.valueOf(s.split(";")[1].trim()), s.split(";")[2].trim()));
+
                 }
             }
             return map;
@@ -164,13 +213,18 @@ public class SSHDevice implements SyncedDevice {
     }
 
     @Override
-    public String getRevision(String remoteFile) throws SyncException {
-        connect();
+    public String getRevision(String remoteFile, Synchronization synchronization) throws SyncException {
+        String res;
         String realRemotePath = (remoteDir + "/" + remoteFile).replaceAll("//", "/");
-        // logger.info("getting revision of file "+realRemotePath);
-        String res = sendCommand("(md5sum " + realRemotePath + " 2>/dev/null || echo error) | awk '{print $1}';");
-        disconnect();
-        return res;
+        if (SSHMySQLDAO.getInstance(jdbcUrl, username, password).isCheckFilesContent(synchronization)) {
+            connect();
+            res = sendCommand("(md5sum " + realRemotePath + " 2>/dev/null || echo error) | awk '{print $1}'");
+            disconnect();
+        } else {
+            res = "0";
+
+        }
+        return res.trim();
     }
 
     @Override
@@ -261,11 +315,36 @@ public class SSHDevice implements SyncedDevice {
             ((ChannelExec) channel).setCommand(command);
             channel.connect();
             InputStream commandOutput;
+            InputStreamReader err;
+
+            try {
+                err = new InputStreamReader(((ChannelExec) channel).getErrStream());
+            } catch (IOException ex) {
+                throw new SyncException(ex);
+            }
+
             try {
                 commandOutput = channel.getInputStream();
             } catch (IOException ex) {
                 throw new SyncException(ex);
             }
+
+            String incomingLine = null;
+            String lines = null;
+            BufferedReader reader = new BufferedReader(err);
+            while ((incomingLine = reader.readLine()) != null) {
+                if (lines == null) {
+                    lines = incomingLine;
+                } else {
+                    lines += incomingLine;
+                }
+            }
+            if (lines != null) {
+                logger.error("Remote command failed with error message " + lines);
+                reader.close();
+                throw new SyncException("Remote command failed with error message " + lines);
+            }
+
             int readByte;
             try {
                 readByte = commandOutput.read();
@@ -283,6 +362,8 @@ public class SSHDevice implements SyncedDevice {
             channel.disconnect();
             return outputBuffer.toString();
         } catch (JSchException ex) {
+            throw new SyncException(ex);
+        } catch (IOException ex) {
             throw new SyncException(ex);
         }
     }
@@ -320,6 +401,16 @@ public class SSHDevice implements SyncedDevice {
 
         return ConfigFile.getInstance().getNbSecond();
 
+    }
+
+    @Override
+    public void updateLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC) throws SyncException {
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).increaseLFCMonitoringParams(ua, numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesDeletedInLFC, sizeOfFilesDeletedInLFC);
+    }
+
+    @Override
+    public void updateDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) throws SyncException {
+        SSHMySQLDAO.getInstance(jdbcUrl, username, password).increaseDeviceMonitoringParams(ua, numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInDevice, sizeOfFilesDeletedInDevice);
     }
 
 }

@@ -38,34 +38,36 @@ operate it in the same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-B license and that you accept its terms.
 */
-package fr.insalyon.creatis.vip.ssha;
 
-import java.io.File;
-import org.apache.log4j.Logger;
-import org.junit.Test;
-import static org.junit.Assert.*;
+package fr.insalyon.creatis.vip.synchronizedcommons;
 
 /**
  *
  * @author Nouha Boujelben
  */
-public class LoggerTest {
-    
-    public LoggerTest() {
+public class FileProperties {
+
+    private long size;
+    private String md5sum;
+
+    public FileProperties(long size, String md5sum) {
+        this.size = size;
+        this.md5sum = md5sum;
     }
-   
-    /**
-     * Test of main method, of class Agent.
-     */
-    @Test
-    public void testLogger() throws Exception {
-       System.setProperty("logfile.name", "./kk.log");
-       File f1=new File("./kk.log");
-       long l1=f1.length(); 
-       final Logger logger = Logger.getLogger(LoggerTest.class);
-       logger.info("write in the logger file");
-       File f2=new File("./ssha.log");  
-       assertTrue("Error, random is to high", f2.length() > l1);
+
+    public long getSize() {
+        return size;
     }
-    
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getMd5sum() {
+        return md5sum;
+    }
+
+    public void setMd5sum(String md5sum) {
+        this.md5sum = md5sum;
+    }
 }

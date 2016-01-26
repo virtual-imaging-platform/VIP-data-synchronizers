@@ -1,6 +1,42 @@
-    /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/*
+ Copyright 2015
+
+ CREATIS
+ CNRS UMR 5220 -- INSERM U1044 -- Université Lyon 1 -- INSA Lyon
+
+ Authors
+
+ Nouha Boujelben (nouha.boujelben@creatis.insa-lyon.fr)
+ Tristan Glatard (tristan.glatard@creatis.insa-lyon.fr)
+
+ This software is a daemon for file synchronization between SFTP
+ servers and the LCG File Catalog (LFC).
+
+ This software is governed by the CeCILL-B license under French law and
+ abiding by the rules of distribution of free software.  You can use,
+ modify and/ or redistribute the software under the terms of the
+ CeCILL-B license as circulated by CEA, CNRS and INRIA at the following
+ URL "http://www.cecill.info".
+
+ As a counterpart to the access to the source code and rights to copy,
+ modify and redistribute granted by the license, users are provided
+ only with a limited warranty and the software's author, the holder of
+ the economic rights, and the successive licensors have only limited
+ liability.
+
+ In this respect, the user's attention is drawn to the risks associated
+ with loading, using, modifying and/or developing or reproducing the
+ software by the user in light of its specific status of free software,
+ that may mean that it is complicated to manipulate, and that also
+ therefore means that it is reserved for developers and experienced
+ professionals having in-depth computer knowledge. Users are therefore
+ encouraged to load and test the software's suitability as regards
+ their requirements in conditions enabling the security of their
+ systems and/or data to be ensured and, more generally, to use and
+ operate it in the same conditions as regards security.
+
+ The fact that you are presently reading this means that you have had
+ knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.insalyon.creatis.vip.ssha;
 
@@ -18,7 +54,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -131,7 +166,9 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             while (rs.next()) {
                 String val = rs.getString("validated");
                 Synchronization ua = new SSHSynchronization(rs.getString("email"), rs.getBoolean("validated"), rs.getBoolean("auth_failed"), rs.getString("LFCDir"), TransferType.valueOf(rs.getString("transferType")),
-                        rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"), rs.getBoolean("deleteFilesFromSource"));
+                        rs.getString("sshUser"), rs.getString("sshHost"), rs.getString("sshDir"), rs.getInt("sshPort"), rs.getBoolean("deleteFilesFromSource"), rs.getBoolean("checkFilesContent"),
+                        rs.getInt("numberOfFilesTransferredToLFC"), rs.getLong("sizeOfFilesTransferredToLFC"), rs.getInt("numberOfFilesTransferredToDevice"), rs.getLong("sizeOfFilesTransferredToDevice"),
+                        rs.getInt("numberOfFilesDeletedInLFC"), rs.getLong("sizeOfFilesDeletedInLFC"), rs.getInt("numberOfFilesDeletedInDevice"), rs.getLong("sizeOfFilesDeletedInDevice"));
                 userAccounts.add(ua);
             }
             ps.close();
@@ -315,4 +352,113 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             throw new SyncException(ex);
         }
     }
+
+    public boolean isCheckFilesContent(Synchronization ua) throws SyncException {
+
+        try {
+
+            PreparedStatement ps2 = connection.prepareStatement("select "
+                    + " checkFilesContent from VIPSSHAccounts "
+                    + "WHERE email = ? and LFCDir=?");
+            ps2.setString(1, ua.getEmail());
+            ps2.setString(2, ua.getSyncedLFCDir());
+            ResultSet rs2 = ps2.executeQuery();
+            boolean checkFilesContent = false;
+            while (rs2.next()) {
+                checkFilesContent = rs2.getBoolean("checkFilesContent");
+            }
+            return checkFilesContent;
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+    }
+
+    public void increaseLFCMonitoringParams(Synchronization ua, int numberOfFilesTransferredToLFC, long sizeOfFilesTransferredToLFC, int numberOfFilesDeletedInLFC, long sizeOfFilesDeletedInLFC) throws SyncException {
+        try {
+            PreparedStatement ps2 = connection.prepareStatement("select "
+                    + "numberOfFilesTransferredToLFC, sizeOfFilesTransferredToLFC, numberOfFilesDeletedInLFC, "
+                    + "sizeOfFilesDeletedInLFC  from VIPSSHAccounts "
+                    + "WHERE email = ? and LFCDir=?");
+            ps2.setString(1, ua.getEmail());
+            ps2.setString(2, ua.getSyncedLFCDir());
+            ResultSet rs2 = ps2.executeQuery();
+            int dBNumberOfFilesTransferredToLFC = 0;
+            long dBSizeOfFilesTransferredToLFC = 0;
+            int dBNumberOfFilesDeletedInLFC = 0;
+            long dBSizeOfFilesDeletedInLFC = 0;
+            while (rs2.next()) {
+                dBNumberOfFilesTransferredToLFC = rs2.getInt("numberOfFilesTransferredToLFC");
+                dBSizeOfFilesTransferredToLFC = rs2.getLong("sizeOfFilesTransferredToLFC");
+                dBNumberOfFilesDeletedInLFC = rs2.getInt("numberOfFilesDeletedInLFC");
+                dBSizeOfFilesDeletedInLFC = rs2.getLong("sizeOfFilesDeletedInLFC");
+            }
+
+            PreparedStatement ps = connection.prepareStatement("UPDATE "
+                    + "VIPSSHAccounts SET "
+                    + "numberOfFilesTransferredToLFC=? "
+                    + ",sizeOfFilesTransferredToLFC=? "
+                    + ",numberOfFilesDeletedInLFC=? "
+                    + ",sizeOfFilesDeletedInLFC=? "
+                    + "WHERE email = ? and LFCDir=?");
+            ps.setInt(1, numberOfFilesTransferredToLFC + dBNumberOfFilesTransferredToLFC);
+            ps.setLong(2, sizeOfFilesTransferredToLFC + dBSizeOfFilesTransferredToLFC);
+            ps.setInt(3, numberOfFilesDeletedInLFC + dBNumberOfFilesDeletedInLFC);
+            ps.setLong(4, sizeOfFilesDeletedInLFC + dBSizeOfFilesDeletedInLFC);
+            ps.setString(5, ua.getEmail());
+            ps.setString(6, ua.getSyncedLFCDir());
+            ps.executeUpdate();
+            ps.close();
+
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+
+    }
+
+    public void increaseDeviceMonitoringParams(Synchronization ua, int numberOfFilesTransferredToDevice, long sizeOfFilesTransferredToDevice, int numberOfFilesDeletedInDevice, long sizeOfFilesDeletedInDevice) throws SyncException {
+        try {
+
+            PreparedStatement ps2 = connection.prepareStatement("select "
+                    + "numberOfFilesTransferredToDevice, sizeOfFilesTransferredToDevice, numberOfFilesDeletedInDevice, "
+                    + "sizeOfFilesDeletedInDevice  from VIPSSHAccounts "
+                    + "WHERE email = ? and LFCDir=?");
+            ps2.setString(1, ua.getEmail());
+            ps2.setString(2, ua.getSyncedLFCDir());
+            ResultSet rs2 = ps2.executeQuery();
+            int dBNumberOfFilesTransferredToDevice = 0;
+            long dBSizeOfFilesTransferredToDevice = 0;
+            int dBNumberOfFilesDeletedInDevice = 0;
+            long dBSizeOfFilesDeletedInDevice = 0;
+            while (rs2.next()) {
+                dBNumberOfFilesTransferredToDevice = rs2.getInt("numberOfFilesTransferredToDevice");
+                dBSizeOfFilesTransferredToDevice = rs2.getLong("sizeOfFilesTransferredToDevice");
+                dBNumberOfFilesDeletedInDevice = rs2.getInt("numberOfFilesDeletedInDevice");
+                dBSizeOfFilesDeletedInDevice = rs2.getLong("sizeOfFilesDeletedInDevice");
+            }
+
+            PreparedStatement ps = connection.prepareStatement("UPDATE "
+                    + "VIPSSHAccounts SET "
+                    + "numberOfFilesTransferredToDevice=? "
+                    + ",sizeOfFilesTransferredToDevice=? "
+                    + ",numberOfFilesDeletedInDevice=? "
+                    + ",sizeOfFilesDeletedInDevice=? "
+                    + "WHERE email = ? and LFCDir=?");
+            ps.setInt(1, numberOfFilesTransferredToDevice + dBNumberOfFilesTransferredToDevice);
+            ps.setLong(2, sizeOfFilesTransferredToDevice + dBSizeOfFilesTransferredToDevice);
+            ps.setInt(3, numberOfFilesDeletedInDevice + dBNumberOfFilesDeletedInDevice);
+            ps.setLong(4, sizeOfFilesDeletedInDevice + dBSizeOfFilesDeletedInDevice);
+            ps.setString(5, ua.getEmail());
+            ps.setString(6, ua.getSyncedLFCDir());
+            ps.executeUpdate();
+            ps.close();
+
+        } catch (SQLException ex) {
+            logger.error(ex);
+            throw new SyncException(ex);
+        }
+
+    }
+
 }
