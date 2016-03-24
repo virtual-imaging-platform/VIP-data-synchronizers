@@ -187,7 +187,10 @@ public class SSHMySQLDAO implements SyncedDeviceDAO {
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS VIPSSHAccounts (email VARCHAR(255), LFCDir VARCHAR(255), "
                     + "sshUser VARCHAR(255), sshHost VARCHAR(255), sshDir VARCHAR(255), sshPort INT, validated BOOLEAN,"
                     + " auth_failed BOOLEAN, theEarliestNextSynchronistation timestamp DEFAULT CURRENT_TIMESTAMP, numberSynchronizationFailed INT, "
-                    + "transferType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, active BOOLEAN DEFAULT 1, PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
+                    + "transferType VARCHAR(255), deleteFilesFromSource BOOLEAN DEFAULT 0, active BOOLEAN DEFAULT 1,checkFilesContent BOOLEAN, "
+                    + "numberOfFilesTransferredToDevice INT DEFAULT 0, sizeOfFilesTransferredToDevice DOUBLE DEFAULT 0, numberOfFilesDeletedInDevice INT DEFAULT 0, sizeOfFilesDeletedInDevice DOUBLE DEFAULT 0, "
+                    + "numberOfFilesTransferredToLFC INT DEFAULT 0, sizeOfFilesTransferredToLFC DOUBLE DEFAULT 0, numberOfFilesDeletedInLFC INT DEFAULT 0,sizeOfFilesDeletedInLFC DOUBLE DEFAULT 0, "
+                    + "PRIMARY KEY(email,LFCDir)) ENGINE=InnoDB");
             logger.info("Table VIPSSHAccounts successfully created.");
 
         } catch (SQLException ex) {
