@@ -175,7 +175,10 @@ public class Synchronizer extends Thread {
         String syncedLFCDir = s.getSyncedLFCDir();
         //this will count how many files are synced for a user
         int countFiles = 0;//this will count how many files are synced for a user
-        logger.info("Listing files for synchronization " + s.toString() + " (this may take some time because file checksums are verified).");
+        String message = "Listing files for synchronization " + s.toString();
+        if(s.isCheckFilesContent())
+            message += " (this may take some time because file checksums are verified).";
+        logger.info(message);
         HashMap<String, FileProperties> remoteFiles = sd.listFiles("/", s);
         HashMap<String, FileProperties> lfcFiles = lfcu.listLFCDir("/", s);
         if (lfcFiles == null || remoteFiles == null) {
