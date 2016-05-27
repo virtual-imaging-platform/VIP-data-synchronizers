@@ -46,7 +46,6 @@ import fr.insalyon.creatis.grida.client.GRIDAClientException;
 import fr.insalyon.creatis.grida.common.bean.GridData;
 import fr.insalyon.creatis.vip.synchronizedcommons.FileProperties;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -98,7 +97,6 @@ public class LFCUtils {
         List<GridData> gds = null;
         try {
             gds = gc.getFolderData(longPath, true, true);
-
         } catch (GRIDAClientException e) {
             throw new SyncException(e);
         }
@@ -116,7 +114,6 @@ public class LFCUtils {
                 if (!ignore(entry)) {
                     //add revision the size of file in this List
                     entries.put(entry, new FileProperties(gd.getLength(), gd.getComment()));
-
                 }
             }
         }

@@ -51,11 +51,8 @@ import com.jcraft.jsch.SftpException;
 import fr.insalyon.creatis.vip.synchronizedcommons.business.SyncException;
 import fr.insalyon.creatis.vip.synchronizedcommons.SyncedDevice;
 import fr.insalyon.creatis.vip.synchronizedcommons.Synchronization;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -148,7 +145,6 @@ public class SSHDevice implements SyncedDevice {
                 if (!s.equals("")) {
                     //add revision the size of file in this List
                     map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), new FileProperties(Long.valueOf(s.split(";")[1].trim()), s.split(";")[2].trim()));
-
                 }
             }
             return map;
@@ -310,64 +306,46 @@ public class SSHDevice implements SyncedDevice {
 
     private String sendCommand(String command) throws SyncException {
         try {
-            StringBuilder outputBuffer = new StringBuilder();
+            
             Channel channel = session.openChannel("exec");
             ((ChannelExec) channel).setCommand(command);
-            channel.connect();
+            
             InputStream commandOutput;
-            InputStreamReader err;
-
+            InputStream commandError;
             try {
-                err = new InputStreamReader(((ChannelExec) channel).getErrStream());
+                commandError = ((ChannelExec) channel).getErrStream();
+                commandOutput = ((ChannelExec) channel).getInputStream();
             } catch (IOException ex) {
                 throw new SyncException(ex);
             }
-
-            try {
-                commandOutput = channel.getInputStream();
-            } catch (IOException ex) {
-                throw new SyncException(ex);
-            }
-
-            String incomingLine = null;
-            String lines = null;
-            BufferedReader reader = new BufferedReader(err);
-            while ((incomingLine = reader.readLine()) != null) {
-                if (lines == null) {
-                    lines = incomingLine;
-                } else {
-                    lines += incomingLine;
+            
+            channel.connect();
+            
+            StringBuilder outputBuffer = new StringBuilder();
+            StringBuilder errorBuffer = new StringBuilder();
+            while(true){
+                while(commandOutput.available()>0)
+                    outputBuffer.append(readStream(commandOutput));                
+                while(commandError.available()>0)
+                    errorBuffer.append(readStream(commandError));
+                if(channel.isClosed()){
+                    if(channel.getExitStatus() != 0)
+                        throw new SyncException("Remote command failed with error message " + errorBuffer.toString());
+                    return outputBuffer.toString();
                 }
             }
-            if (lines != null) {
-                logger.error("Remote command failed with error message " + lines);
-                reader.close();
-                throw new SyncException("Remote command failed with error message " + lines);
-            }
-
-            int readByte;
-            try {
-                readByte = commandOutput.read();
-            } catch (IOException ex) {
-                throw new SyncException(ex);
-            }
-            while (readByte != 0xffffffff) {
-                outputBuffer.append((char) readByte);
-                try {
-                    readByte = commandOutput.read();
-                } catch (IOException ex) {
-                    throw new SyncException(ex);
-                }
-            }
-            channel.disconnect();
-            return outputBuffer.toString();
-        } catch (JSchException ex) {
-            throw new SyncException(ex);
-        } catch (IOException ex) {
+ 
+        } catch (JSchException | IOException ex) {
             throw new SyncException(ex);
         }
     }
 
+    private String readStream(InputStream in) throws IOException {
+        byte[] buffer = new byte[1024];
+        int i = in.read(buffer, 0, 1024);
+        return new String(buffer, 0, i);
+    }
+        
     @Override
     public boolean isMustWaitBeforeNextSynchronization(Synchronization ua) throws SyncException {
 
