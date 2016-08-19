@@ -143,8 +143,13 @@ public class SSHDevice implements SyncedDevice {
             }
             for (String s : sendCommand(command).split("\n")) {
                 if (!s.equals("")) {
-                    //add revision the size of file in this List
-                    map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), new FileProperties(Long.valueOf(s.split(";")[1].trim()), s.split(";")[2].trim()));
+                    try{
+                        //add revision the size of file in this List
+                        map.put(s.split(";")[0].trim().replaceAll("//", "/").replaceAll(remoteDir, ""), new FileProperties(Long.valueOf(s.split(";")[1].trim()), s.split(";")[2].trim()));
+                    }catch(Exception e){
+                        logger.error("Exception caught on "+ s + " for remoteDir "+remoteDir);
+                        e.printStackTrace();
+                    }
                 }
             }
             return map;
